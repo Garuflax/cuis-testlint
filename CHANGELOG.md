@@ -6,7 +6,7 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.1...HEAD)
 
-## [1.0](https://github.com/olivierlacan/keep-a-changelog/compare/v1.0...v1.1) - 2022-04-14
+## [1.1](https://github.com/olivierlacan/keep-a-changelog/compare/v1.0...v1.1) - 2022-04-14
 ### Added
 - Rule for detecting Anonymous Test.
 
