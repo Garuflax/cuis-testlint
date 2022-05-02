@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 1 May 2022 at 4:32:06 pm'!
+'From Cuis 6.0 [latest update: #5093] on 2 May 2022 at 8:08:19 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 2!
+!provides: 'TestLint' 1 3!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -412,11 +412,11 @@ with: rules
 	
 	^self new initializeWith: rules ! !
 
-!Browser methodsFor: '*TestLint' stamp: 'FL 4/14/2022 18:22:06'!
+!Browser methodsFor: '*TestLint' stamp: 'FL 5/2/2022 19:43:57'!
 runTestLintOverMethod
 	
-	TestLintRunner 
-		run: (Node for: currentCompiledMethod)
+	currentCompiledMethod isTestMethod ifTrue: [
+		TestLintRunner run: (Node for: currentCompiledMethod)]
 
 	
 	! !

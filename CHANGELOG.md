@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.2...HEAD)
+### Added
+- Only permit running TestLint on Test Methods.
 
-## [1.2](https://github.com/Garuflax/cuis-testlint/compare/v1.0...v1.2) - 2022-05-01
+## [1.2](https://github.com/Garuflax/cuis-testlint/compare/v1.1...v1.2) - 2022-05-01
 ### Added
 - Rule for detecting Long Test.
 
