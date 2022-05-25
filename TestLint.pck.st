@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 15 May 2022 at 7:15:50 pm'!
+'From Cuis 6.0 [latest update: #5093] on 25 May 2022 at 7:34:50 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 4!
+!provides: 'TestLint' 1 5!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -45,6 +45,16 @@ TestCase subclass: #LongTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'LongTestRuleTest class' category: 'TestLint-Tests'!
 LongTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #MixedSelectorsRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #MixedSelectorsRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'MixedSelectorsRuleTest class' category: 'TestLint-Tests'!
+MixedSelectorsRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLintTest category: 'TestLint-Tests'!
@@ -125,6 +135,16 @@ Rule subclass: #MethodCategoryRule
 	category: 'TestLint-Model'!
 !classDefinition: 'MethodCategoryRule class' category: 'TestLint-Model'!
 MethodCategoryRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #MixedSelectorsRule category: 'TestLint-Model'!
+MethodCategoryRule subclass: #MixedSelectorsRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'MixedSelectorsRule class' category: 'TestLint-Model'!
+MixedSelectorsRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodRule category: 'TestLint-Model'!
@@ -208,6 +228,11 @@ name
 
 	self subclassResponsibility ! !
 
+!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 18:43:45'!
+name
+
+	^categoryName! !
+
 !TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/1/2022 15:41:03'!
 linesOfCode
 	^compiledMethod sourceCode lineCount! !
@@ -220,12 +245,12 @@ name
 buildMorphicWindow
 	! !
 
-!TestLintResultWindow class methodsFor: 'instance creation' stamp: 'FL 4/14/2022 19:08:01'!
+!TestLintResultWindow class methodsFor: 'instance creation' stamp: 'FL 5/25/2022 19:33:47'!
 displayTestLintResultFrom: results
 	
 	| resultsList testLintResultWindow |
 	resultsList := LayoutMorph newColumn.
-	results do: [:result | resultsList addMorph: (TextParagraphMorph contents: result)].
+	results do: [:result | resultsList addMorph: (TextParagraphMorph contents: result message)].
 	testLintResultWindow := self open: nil label: 'TestLint Result'.
 	testLintResultWindow layoutMorph addMorph: resultsList.
 	^testLintResultWindow! !
@@ -416,6 +441,46 @@ test02LongTestRuleSatisfied
 	
 	self assert: 0 equals: result size.! !
 
+!MixedSelectorsRuleTest methodsFor: 'test objects mixed' stamp: 'FL 5/25/2022 18:34:23'!
+method100
+	^0! !
+
+!MixedSelectorsRuleTest methodsFor: 'test objects mixed' stamp: 'FL 5/25/2022 18:33:57'!
+test100
+
+	self assert: 0 equals: self method100.! !
+
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:23:22'!
+test01CategoryWithoutMethodsDoesNotHaveMixedSelectors
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	
+	results := aTestLint runNode: (MethodCategoryNode for: 'test objects empty' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	
+	self assert: 0 equals: results size.! !
+
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:36:27'!
+test02CategoryWithMixedSelectors
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	
+	results := aTestLint runNode: (MethodCategoryNode for: 'test objects mixed' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	
+	self assert: 1 equals: results size.
+	self assert: 'test objects mixed is a Category with Mixed Selectors' equals: results first message! !
+
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:46:45'!
+test03CategoryWithoutMixedSelectors
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	
+	results := aTestLint runNode: (MethodCategoryNode for: 'tests' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	
+	self assert: 0 equals: results size.! !
+
 !TestLintTest methodsFor: 'tests' stamp: 'FL 5/8/2022 16:15:20'!
 test01RunWithoutRulesFinishesFine
 
@@ -532,10 +597,10 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 5/8/2022 15:36:18'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 5/25/2022 19:30:22'!
 testRules
 
-	^ Array with: AnonymousTestRule new with: (LongTestRule withThreshold: 20) with: GuardedTestRule new! !
+	^ Array with: AnonymousTestRule new with: (LongTestRule withThreshold: 20) with: GuardedTestRule new with: MixedSelectorsRule new! !
 
 !Node methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:19:46'!
 applyRule: aRule 
@@ -552,10 +617,15 @@ initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer
 applyRule: aRule 
 	^aRule runMethodCategory: self.! !
 
-!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/9/2022 22:07:08'!
+!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 19:14:11'!
+compiledMethodsList
+
+	^(classOrganizer listAtCategoryNamed: categoryName ) collect: [ :selector |
+		(class compiledMethodAt: selector) ].! !
+
+!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 19:14:47'!
 testMethodsNodeList
-	^((classOrganizer listAtCategoryNamed: categoryName ) collect: [ :selector |
-		(class compiledMethodAt: selector) ] thenSelect: [ :compiledMethod | compiledMethod isTestMethod ]) collect: [ :compiledMethod | TestMethodNode for: compiledMethod ].! !
+	^(self compiledMethodsList select: [ :compiledMethod | compiledMethod isTestMethod ]) collect: [ :compiledMethod | TestMethodNode for: compiledMethod ].! !
 
 !MethodCategoryNode class methodsFor: 'instance creation' stamp: 'FL 5/8/2022 16:29:09'!
 for: aCategoryName of: aClass categorizedWith: aClassOrganizer 
@@ -596,9 +666,40 @@ testSmell: aNode
 violationMessage
 	self subclassResponsibility ! !
 
+!MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:32:46'!
+runMethod: aTestMethodNode 
+	^self noTestSmell ! !
+
+!MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 18:25:38'!
+runMethodCategory: aMethodCategoryNode 
+
+	^self subclassResponsibility ! !
+
 !MethodCategoryRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:38:50'!
 violationMessage
 	self subclassResponsibility ! !
+
+!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:29:42'!
+areAllMethodsOfSameType: compiledMethodsCollection 
+	
+	^compiledMethodsCollection collect: [:compiledMethod | compiledMethod isTestMethod] andFold: [:a :b | a = b] ifEmpty: [true].! !
+
+!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:22:07'!
+hasMixedSelectors: aMethodCategoryNode
+
+	| compiledMethods |
+	
+	compiledMethods _ aMethodCategoryNode compiledMethodsList.
+	^(self areAllMethodsOfSameType: compiledMethods) not.! !
+
+!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:29:48'!
+runMethodCategory: aMethodCategoryNode
+
+	^(self hasMixedSelectors: aMethodCategoryNode) ifTrue: [self testSmell: aMethodCategoryNode ] ifFalse: [self noTestSmell].! !
+
+!MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 5/25/2022 18:45:12'!
+violationMessage
+	^'is a Category with Mixed Selectors'! !
 
 !MethodRule methodsFor: 'evaluating' stamp: 'FL 4/26/2022 20:03:05'!
 runMethod: aMethodNode 

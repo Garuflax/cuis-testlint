@@ -4,9 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.4...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.5...HEAD)
 
-## [1.4](https://github.com/Garuflax/cuis-testlint/compare/v1.2...v1.4) - 2022-05-15
+## [1.5](https://github.com/Garuflax/cuis-testlint/compare/v1.4...v1.5) - 2022-25-15
+### Added
+- Rule for detecting categories with Mixed Selectors.
+
+### Fixed
+- Correct printing of Test Smells.
+
+## [1.4](https://github.com/Garuflax/cuis-testlint/compare/v1.2...v1.4) - 2022-15-15
 ### Added
 - Rule for detecting Guarded Test.
 - New context menu option for Categories to run testlint over them.
