@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 25 May 2022 at 7:34:50 pm'!
+'From Cuis 6.0 [latest update: #5093] on 28 May 2022 at 12:03:39 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 5!
+!provides: 'TestLint' 1 6!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -105,6 +105,16 @@ Node subclass: #MethodCategoryNode
 	category: 'TestLint-Model'!
 !classDefinition: 'MethodCategoryNode class' category: 'TestLint-Model'!
 MethodCategoryNode class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestClassNode category: 'TestLint-Model'!
+Node subclass: #TestClassNode
+	instanceVariableNames: 'class'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestClassNode class' category: 'TestLint-Model'!
+TestClassNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestMethodNode category: 'TestLint-Model'!
@@ -537,6 +547,18 @@ test05RunWithMethodRuleOverMethodCategoryNodeAppliesItToEveryTestMethodInside
 	self assert: 'test100notAnonymous is a Long Test' equals: results second message.
 	self assert: 'test is an Anonymous Test' equals: results third message.! !
 
+!TestLintTest methodsFor: 'tests' stamp: 'FL 5/26/2022 20:22:58'!
+test06RunWithMethodRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new with: AnonymousTestRule new).
+	
+	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	
+	self assert: 2 equals: results size.
+	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.
+	self assert: 'test is an Anonymous Test' equals: results second message.! !
+
 !TestLintTest methodsFor: 'test objects' stamp: 'FL 4/10/2022 16:59:58'!
 compiledTestWithoutAssert
 
@@ -632,6 +654,24 @@ for: aCategoryName of: aClass categorizedWith: aClassOrganizer
 	
 	^self new initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer ! !
 
+!TestClassNode methodsFor: 'initialization' stamp: 'FL 5/26/2022 19:54:10'!
+initializeFor: aClass 
+
+	class := aClass.! !
+
+!TestClassNode methodsFor: 'evaluating' stamp: 'FL 5/26/2022 19:55:15'!
+applyRule: aRule 
+	^aRule runClass: self.! !
+
+!TestClassNode methodsFor: 'accessing' stamp: 'FL 5/26/2022 20:19:40'!
+methodCategoryNodeList
+	^class methodCategories collect: [ :methodCategorySymbol | MethodCategoryNode for: methodCategorySymbol asString of: class categorizedWith: class organization ].! !
+
+!TestClassNode class methodsFor: 'instance creation' stamp: 'FL 5/26/2022 19:53:43'!
+for: aClass 
+	
+	^self new initializeFor: aClass ! !
+
 !TestMethodNode methodsFor: 'initialization' stamp: 'FL 4/10/2022 16:49:23'!
 initializeFor: aCompiledMethod 
 	
@@ -666,6 +706,11 @@ testSmell: aNode
 violationMessage
 	self subclassResponsibility ! !
 
+!MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/26/2022 20:00:33'!
+runClass: aTestClassNode 
+	^aTestClassNode methodCategoryNodeList collect: [ :methodCategoryNode |
+		self runMethodCategory: methodCategoryNode] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
+
 !MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:32:46'!
 runMethod: aTestMethodNode 
 	^self noTestSmell ! !
@@ -679,10 +724,18 @@ runMethodCategory: aMethodCategoryNode
 violationMessage
 	self subclassResponsibility ! !
 
-!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:29:42'!
+!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/28/2022 12:01:42'!
+amountOfTestMethods: compiledMethodsCollection
+
+	^ compiledMethodsCollection count: [:compiledMethod | compiledMethod isTestMethod]! !
+
+!MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/28/2022 12:02:00'!
 areAllMethodsOfSameType: compiledMethodsCollection 
 	
-	^compiledMethodsCollection collect: [:compiledMethod | compiledMethod isTestMethod] andFold: [:a :b | a = b] ifEmpty: [true].! !
+	| amountOfTestMethods |
+	amountOfTestMethods _ self amountOfTestMethods: compiledMethodsCollection.
+	
+	^amountOfTestMethods = 0 or: [amountOfTestMethods = compiledMethodsCollection size].! !
 
 !MixedSelectorsRule methodsFor: 'evaluating' stamp: 'FL 5/25/2022 19:22:07'!
 hasMixedSelectors: aMethodCategoryNode
@@ -700,6 +753,11 @@ runMethodCategory: aMethodCategoryNode
 !MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 5/25/2022 18:45:12'!
 violationMessage
 	^'is a Category with Mixed Selectors'! !
+
+!MethodRule methodsFor: 'evaluating' stamp: 'FL 5/26/2022 20:22:08'!
+runClass: aTestClassNode 
+	^aTestClassNode methodCategoryNodeList collect: [ :methodCategoryNode |
+		self runMethodCategory: methodCategoryNode] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
 
 !MethodRule methodsFor: 'evaluating' stamp: 'FL 4/26/2022 20:03:05'!
 runMethod: aMethodNode 
