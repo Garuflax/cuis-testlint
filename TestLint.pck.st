@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 28 May 2022 at 12:03:39 pm'!
+'From Cuis 6.0 [latest update: #5093] on 29 May 2022 at 2:59:38 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 6!
+!provides: 'TestLint' 1 7!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -579,6 +579,20 @@ test100notAnonymous
 
 	Object new.! !
 
+!TestLintBrowserMenus class methodsFor: 'browser menus' stamp: 'FL 5/29/2022 14:55:36'!
+classListMenuOptions
+
+	^ `{
+		{
+			#itemGroup 		-> 		70.
+			#itemOrder 		-> 		15.
+			#label 			-> 	'run testlint'.
+			#object 			-> 	#model.
+			#selector 		   -> 		#runTestLintOverClass.
+			#icon 			-> 	#displayIcon
+		} asDictionary.
+	   }`.! !
+
 !TestLintBrowserMenus class methodsFor: 'browser menus' stamp: 'FL 5/8/2022 15:51:28'!
 messageCategoryMenuOptions
 
@@ -864,6 +878,14 @@ message
 withNode: aTestMethodNode andRule: anAnonymousTestRule 
 	
 	^self new initializeWithNode: aTestMethodNode andRule: anAnonymousTestRule ! !
+
+!Browser methodsFor: '*TestLint' stamp: 'FL 5/29/2022 14:51:54'!
+runTestLintOverClass
+	
+	self selectedClassName ifNotNil: [ :aClassName | | selectedClass |
+		selectedClass _ Smalltalk classNamed: aClassName.
+		(selectedClass is: #TestCaseClass) ifTrue: [
+			TestLintRunner run: (TestClassNode for: selectedClass) ]]! !
 
 !Browser methodsFor: '*TestLint' stamp: 'FL 5/9/2022 22:10:12'!
 runTestLintOverMessageCategory

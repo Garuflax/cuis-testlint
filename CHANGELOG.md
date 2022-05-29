@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.5...HEAD)
+### Added
+- New context menu option for Test Classes to run testlint over them.
+
 ### Fixed
 - Mixed Selectors Rule was only checking if the last 2 methods of the category were of the same type.
 
