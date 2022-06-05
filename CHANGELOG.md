@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.8...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.9...HEAD)
+
+## [1.9](https://github.com/Garuflax/cuis-testlint/compare/v1.8...v1.9) - 2022-06-05
+### Added
+- Mark expected test smells implementing the method "expectedTestLintFailures".
 
 ## [1.8](https://github.com/Garuflax/cuis-testlint/compare/v1.5...v1.8) - 2022-05-29
 ### Added
