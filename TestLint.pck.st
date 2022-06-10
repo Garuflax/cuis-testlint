@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 5 June 2022 at 5:44:46 pm'!
+'From Cuis 6.0 [latest update: #5093] on 10 June 2022 at 9:22:05 am'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 9!
+!provides: 'TestLint' 1 10!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -45,6 +45,16 @@ TestCase subclass: #LongTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'LongTestRuleTest class' category: 'TestLint-Tests'!
 LongTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #MaxInstanceVariablesRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #MaxInstanceVariablesRuleTest
+	instanceVariableNames: 'unused'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'MaxInstanceVariablesRuleTest class' category: 'TestLint-Tests'!
+MaxInstanceVariablesRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #MixedSelectorsRuleTest category: 'TestLint-Tests'!
@@ -165,6 +175,26 @@ Object subclass: #Rule
 	category: 'TestLint-Model'!
 !classDefinition: 'Rule class' category: 'TestLint-Model'!
 Rule class
+	instanceVariableNames: ''!
+
+!classDefinition: #ClassRule category: 'TestLint-Model'!
+Rule subclass: #ClassRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'ClassRule class' category: 'TestLint-Model'!
+ClassRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #MaxInstanceVariablesRule category: 'TestLint-Model'!
+ClassRule subclass: #MaxInstanceVariablesRule
+	instanceVariableNames: 'threshold'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'MaxInstanceVariablesRule class' category: 'TestLint-Model'!
+MaxInstanceVariablesRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodCategoryRule category: 'TestLint-Model'!
@@ -299,6 +329,10 @@ name
 name
 
 	^categoryName! !
+
+!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/8/2022 19:41:20'!
+name
+	^linkedClass name ! !
 
 !TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/1/2022 15:41:03'!
 linesOfCode
@@ -523,6 +557,33 @@ test03CannotCreateLostTestRuleWithNegativeThreshold
 
 	self should: [LongTestRule withThreshold: -1] raise: Error withMessageText: LongTestRule invalidThresholdDescription.! !
 
+!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:21:03'!
+test01MaxInstanceVariablesRuleSatisfied
+
+    | aMaxInstanceVariablesRule result |
+    aMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 1.
+    
+    result := aMaxInstanceVariablesRule runClass: (TestClassNode for: (Smalltalk classNamed: 'MaxInstanceVariablesRuleTest')).
+    
+    self assert: result isEmpty.! !
+
+!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:32:30'!
+test02MaxInstanceVariablesRuleNotSatisfied
+
+    | aMaxInstanceVariablesRule results aTestClassNode |
+    aMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 0.
+    aTestClassNode := TestClassNode for: (Smalltalk classNamed: 'MaxInstanceVariablesRuleTest').
+    
+    results := aMaxInstanceVariablesRule runClass: aTestClassNode.
+    
+    self assert: 1 equals: results size.
+    self assert: (TestSmell withNode: aTestClassNode andRule: aMaxInstanceVariablesRule) message equals: results first message.! !
+
+!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:44:10'!
+test03CannotCreateMaxInstanceVariablesRuleWithNegativeThreshold
+
+	self should: [MaxInstanceVariablesRule withThreshold: -1] raise: Error withMessageText: MaxInstanceVariablesRule invalidThresholdDescription.! !
+
 !MixedSelectorsRuleTest methodsFor: 'test objects mixed' stamp: 'FL 5/25/2022 18:34:23'!
 method100
 	^0! !
@@ -532,34 +593,34 @@ test100Object
 
 	self assert: 0 equals: self method100.! !
 
-!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:23:22'!
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:24:42'!
 test01CategoryWithoutMethodsDoesNotHaveMixedSelectors
 
-	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	| aMixedSelectorsRule results |
+	aMixedSelectorsRule := MixedSelectorsRule new.
 	
-	results := aTestLint runNode: (MethodCategoryNode for: 'test objects empty' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	results := aMixedSelectorsRule runMethodCategory: (MethodCategoryNode for: 'test objects empty' of: MixedSelectorsRuleTest categorizedWith: self class organization).
 	
 	self assert: 0 equals: results size.! !
 
-!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:36:27'!
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:25:01'!
 test02CategoryWithMixedSelectors
 
-	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	| aMixedSelectorsRule results |
+	aMixedSelectorsRule := MixedSelectorsRule new.
 	
-	results := aTestLint runNode: (MethodCategoryNode for: 'test objects mixed' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	results := aMixedSelectorsRule runMethodCategory: (MethodCategoryNode for: 'test objects mixed' of: MixedSelectorsRuleTest categorizedWith: self class organization).
 	
 	self assert: 1 equals: results size.
 	self assert: 'test objects mixed is a Category with Mixed Selectors' equals: results first message! !
 
-!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 5/25/2022 18:46:45'!
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:25:20'!
 test03CategoryWithoutMixedSelectors
 
-	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	| aMixedSelectorsRule results |
+	aMixedSelectorsRule := MixedSelectorsRule new.
 	
-	results := aTestLint runNode: (MethodCategoryNode for: 'tests' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	results := aMixedSelectorsRule runMethodCategory: (MethodCategoryNode for: 'tests' of: MixedSelectorsRuleTest categorizedWith: self class organization).
 	
 	self assert: 0 equals: results size.! !
 
@@ -629,17 +690,16 @@ test05RunWithMethodRuleOverMethodCategoryNodeAppliesItToEveryTestMethodInside
 	self assert: 'test100notAnonymous is a Long Test' equals: results second message.
 	self assert: 'test is an Anonymous Test' equals: results third message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/26/2022 20:22:58'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:00:53'!
 test06RunWithMethodRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new with: AnonymousTestRule new).
+	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
 	
 	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
-	self assert: 2 equals: results size.
-	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.
-	self assert: 'test is an Anonymous Test' equals: results second message.! !
+	self assert: 1 equals: results size.
+	self assert: 'test is an Anonymous Test' equals: results first message.! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/4/2022 18:58:48'!
 test07RunWithExpectedFailureNotAppearingNotifiesIt
@@ -691,6 +751,70 @@ test11RunWithExpectedFailureInCategoryAppearingDoesNotNotifyIt
 	aClass := self class.
 	
 	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization) withExpectedTestSmells: (Array with: (ExpectedTestSmell inCategory: #'test objects' of: aClass for: MixedSelectorsRule because: 'Testing purpose')).
+	
+	self assert: results isEmpty.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:59:22'!
+test12RunWithMethodCategoryRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	
+	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	
+	self assert: 1 equals: results size.
+	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:24:43'!
+test13RunWithExpectedFailureInClassNotAppearingNotifiesIt
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)).
+	
+	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')) withExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')).
+	
+	self assert: 1 equals: results size.
+	self assert: 'TestLintTest was expected to violate MaxInstanceVariablesRule because Testing purpose' equals: results first message.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:20:53'!
+test14RunWithMethodCategoryRuleOverMethodCategoryNodeIsOK
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	
+	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
+	
+	self assert: 1 equals: results size.
+	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:22:04'!
+test15RunWithClassRuleOverClassNodeIsOK
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: (MaxInstanceVariablesRule withThreshold: 0)).
+	
+	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
+	
+	self assert: results isEmpty.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:39:14'!
+test16RunWithExpectedFailureButTestIsNotRunIsOK
+
+	| aTestLint results |
+	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	
+	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert2) withExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose')).
+	
+	self assert: results isEmpty.! !
+
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/10/2022 09:16:56'!
+test17RunWithExpectedFailureInClassDoesNotNotififyItIfItRunsAMethodCategoryNode
+
+	| aTestLint results aClass |
+	aTestLint := TestLint with: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)).
+	aClass := self class.
+	
+	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization) withExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')).
 	
 	self assert: results isEmpty.! !
 
@@ -796,10 +920,10 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 5/25/2022 19:30:22'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 6/8/2022 19:53:10'!
 testRules
 
-	^ Array with: AnonymousTestRule new with: (LongTestRule withThreshold: 20) with: GuardedTestRule new with: MixedSelectorsRule new! !
+	^ Array with: AnonymousTestRule new with: (LongTestRule withThreshold: 20) with: GuardedTestRule new with: MixedSelectorsRule new with: (MaxInstanceVariablesRule withThreshold: 10)! !
 
 !ExpectedTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 16:46:20'!
 initializeIn: aNode for: aRuleClass because: aDescription 
@@ -840,6 +964,13 @@ inCategory: aSymbol of: aClass for: aMethodCategoryRuleClass because: aDescripti
 	methodCategoryNode := MethodCategoryNode for: aSymbol of: aClass categorizedWith: aClass organization.
 	^self new initializeIn: methodCategoryNode for: aMethodCategoryRuleClass because: aDescription ! !
 
+!ExpectedTestSmell class methodsFor: 'instance creation' stamp: 'FL 6/8/2022 20:15:30'!
+inClass: aSymbol for: aClassRule because: aDescription 
+	
+	| testClassNode |
+	testClassNode := TestClassNode for: (Smalltalk classNamed: aSymbol).
+	^self new initializeIn: testClassNode for: aClassRule because: aDescription.! !
+
 !ExpectedTestSmell class methodsFor: 'instance creation' stamp: 'FL 6/5/2022 14:42:43'!
 inTest: aSymbol of: aClass for: aMethodRuleClass because: aDescription 
 	
@@ -856,6 +987,10 @@ applyRule: aRule
 linkedClass
 
 	self subclassResponsibility ! !
+
+!Node methodsFor: 'testing' stamp: 'FL 6/10/2022 09:06:32'!
+contains: aNode 
+	self subclassResponsibility.! !
 
 !MethodCategoryNode methodsFor: 'initialization' stamp: 'FL 6/5/2022 14:53:51'!
 initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer 
@@ -893,6 +1028,10 @@ testMethodsNodeList
 
 	^self class = other class and: [linkedClass = other linkedClass] and: [categoryName = other categoryName].! !
 
+!MethodCategoryNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:11:36'!
+contains: aNode 
+	^self = aNode or: [self testMethodsNodeList anySatisfy: [:aTestMethodNode | aTestMethodNode contains: aNode]]! !
+
 !MethodCategoryNode class methodsFor: 'instance creation' stamp: 'FL 5/8/2022 16:29:09'!
 for: aCategoryName of: aClass categorizedWith: aClassOrganizer 
 	
@@ -914,6 +1053,15 @@ linkedClass
 !TestClassNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 14:53:41'!
 methodCategoryNodeList
 	^linkedClass methodCategories collect: [ :methodCategorySymbol | MethodCategoryNode for: methodCategorySymbol asString of: linkedClass categorizedWith: linkedClass organization ].! !
+
+!TestClassNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:12:25'!
+contains: aNode 
+	^self = aNode or: [self methodCategoryNodeList anySatisfy: [:aMethodCategoryNode | aMethodCategoryNode contains: aNode]]! !
+
+!TestClassNode methodsFor: 'comparing' stamp: 'FL 6/10/2022 09:14:16'!
+= other
+
+	^self class = other class and: [linkedClass = other linkedClass].! !
 
 !TestClassNode class methodsFor: 'instance creation' stamp: 'FL 5/29/2022 16:41:59'!
 for: aClass 
@@ -963,6 +1111,10 @@ linkedClass
 !TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/6/2022 08:46:21'!
 methodNode
 	^compiledMethod methodNode ! !
+
+!TestMethodNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:07:48'!
+contains: aNode 
+	^self = aNode! !
 
 !TestMethodNode class methodsFor: 'assertion' stamp: 'FL 5/29/2022 16:34:53'!
 isTestMethod: aCompiledMethod
@@ -1031,6 +1183,43 @@ testSmell: aNode
 !Rule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:38:16'!
 violationMessage
 	self subclassResponsibility ! !
+
+!ClassRule methodsFor: 'evaluating' stamp: 'FL 6/8/2022 19:14:51'!
+runClass: aTestClassNode 
+	^self runForReal: aTestClassNode.! !
+
+!MaxInstanceVariablesRule methodsFor: 'initialization' stamp: 'FL 6/8/2022 19:17:28'!
+initializeWithThreshold: aThreshold 
+	
+	threshold := aThreshold.! !
+
+!MaxInstanceVariablesRule methodsFor: 'execution' stamp: 'FL 6/8/2022 19:40:31'!
+isViolatedBy: aTestClassNode 
+	^aTestClassNode linkedClass instVarNames size > threshold! !
+
+!MaxInstanceVariablesRule class methodsFor: 'instance creation' stamp: 'FL 6/8/2022 19:48:06'!
+withThreshold: aThreshold 
+	
+	self validThreshold: aThreshold.
+	
+	^self new initializeWithThreshold: aThreshold ! !
+
+!MaxInstanceVariablesRule class methodsFor: 'message' stamp: 'FL 6/8/2022 19:42:18'!
+violationMessage
+	^'has too many instance variables'! !
+
+!MaxInstanceVariablesRule class methodsFor: 'error description' stamp: 'FL 6/8/2022 19:45:05'!
+invalidThresholdDescription
+	^'threshold cannot be negative'! !
+
+!MaxInstanceVariablesRule class methodsFor: 'error' stamp: 'FL 6/8/2022 19:47:18'!
+errorInvalidThreshold
+
+	^ self error: self invalidThresholdDescription! !
+
+!MaxInstanceVariablesRule class methodsFor: 'assertions' stamp: 'FL 6/8/2022 19:48:47'!
+validThreshold: aThreshold 
+	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
 
 !MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 16:05:43'!
 runMethodCategory: aMethodCategoryNode 
@@ -1211,12 +1400,18 @@ runNode: aNode
 
 	^ rules collect: [:rule | rule runNode: aNode] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
 
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/4/2022 19:15:51'!
-runNode: aTestClassNode withExpectedTestSmells: anExpectedFailureCollection 
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/8/2022 20:46:12'!
+runNode: aNode withExpectedTestSmells: anExpectedFailureCollection 
 	
-	| expectedTestSmellsOfRunRules |
+	| expectedTestSmellsOfRunRules effectiveExpectedTestSmells |
 	expectedTestSmellsOfRunRules := self selectExpectedTestSmellsOfRunRules: anExpectedFailureCollection.
-	^self checkExpectedFailures: expectedTestSmellsOfRunRules over: (self runNode: aTestClassNode)! !
+	effectiveExpectedTestSmells := self selectExpectedTestSmells: expectedTestSmellsOfRunRules ofRunNode: aNode.
+	^self checkExpectedFailures: effectiveExpectedTestSmells over: (self runNode: aNode)! !
+
+!TestLint methodsFor: 'select' stamp: 'FL 6/10/2022 09:05:50'!
+selectExpectedTestSmells: anExpectedTestSmellCollection ofRunNode: aNode
+
+	^anExpectedTestSmellCollection select: [:anExpectedTestSmell | aNode contains: anExpectedTestSmell node].! !
 
 !TestLint methodsFor: 'select' stamp: 'FL 6/4/2022 19:19:08'!
 selectExpectedTestSmellsOfRunRules: anExpectedTestSmellCollection

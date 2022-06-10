@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.9...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.10...HEAD)
+
+## [1.10](https://github.com/Garuflax/cuis-testlint/compare/v1.9...v1.10) - 2022-06-10
+### Added
+- Rule for detecting classes that have too many instance variables.
+
+### Fixed
+- Expected failures of not run nodes were being notified.
 
 ## [1.9](https://github.com/Garuflax/cuis-testlint/compare/v1.8...v1.9) - 2022-06-05
 ### Added
