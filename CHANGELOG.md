@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.10...HEAD)
+### Changed
+- TestLint is now run as a "Method Object".
 
 ## [1.10](https://github.com/Garuflax/cuis-testlint/compare/v1.9...v1.10) - 2022-06-10
 ### Added

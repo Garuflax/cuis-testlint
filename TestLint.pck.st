@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 10 June 2022 at 9:22:05 am'!
+'From Cuis 6.0 [latest update: #5093] on 23 June 2022 at 7:46:11 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 10!
+!provides: 'TestLint' 1 11!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -259,7 +259,7 @@ LongTestRule class
 
 !classDefinition: #TestLint category: 'TestLint-Model'!
 Object subclass: #TestLint
-	instanceVariableNames: 'rules'
+	instanceVariableNames: 'rules ruleCollection expectedFailures node notExpectedTestSmells notSatisfiedExpectations'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -634,187 +634,191 @@ test01CannotCreateTestClassNodeWithoutATestClass
 
 	self should: [TestClassNode for: (Smalltalk classNamed: 'TestClassNode')] raise: Error withMessageText: TestClassNode notATestClassErrorDescription.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/8/2022 16:15:20'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 16:51:50'!
 test01RunWithoutRulesFinishesFine
 
 	| aTestLint results |
-	aTestLint := TestLint with: #().
+	aTestLint := TestLint withRules: #() forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:13:21'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:03:37'!
 test02RunWithOneRuleNotSatisfiedForMethodNodeReturnsDescription
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test is an Anonymous Test' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/10/2022 22:21:21'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:04:03'!
 test03RunWithRuleSatisfiedDoesNotReturnAnyDescription
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert2).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert2).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:13:34'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:04:31'!
 test04RunReturnsDescriptionForAllRulesThatWereNotSatisfied
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	results := aTestLint run.
 	
 	self assert: 2 equals: results size.
 	self assert: 'test is a Long Test' equals: results first message.
 	self assert: 'test is an Anonymous Test' equals: results second message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:13:51'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:05:01'!
 test05RunWithMethodRuleOverMethodCategoryNodeAppliesItToEveryTestMethodInside
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new) forNode: (MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization).
 	
-	results := aTestLint runNode: (MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization).
+	results := aTestLint run.
 	
 	self assert: 3 equals: results size.
 	self assert: 'test is a Long Test' equals: results first message.
 	self assert: 'test100notAnonymous is a Long Test' equals: results second message.
 	self assert: 'test is an Anonymous Test' equals: results third message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:00:53'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:05:34'!
 test06RunWithMethodRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
-	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test is an Anonymous Test' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/4/2022 18:58:48'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:08:01'!
 test07RunWithExpectedFailureNotAppearingNotifiesIt
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) andExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test100notAnonymous of: self class for: AnonymousTestRule because: 'Testing purpose')) forNode: (TestMethodNode for: self compiledTestWithoutAssert2).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert2) withExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test100notAnonymous of: self class for: AnonymousTestRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test100notAnonymous was expected to violate AnonymousTestRule because Testing purpose' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/4/2022 18:58:48'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:08:56'!
 test08RunWithExpectedFailureButRuleIsNotRunIsOK
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array new).
+	aTestLint := TestLint withRules: (Array new) andExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test100notAnonymous of: self class for: AnonymousTestRule because: 'Testing purpose')) forNode: (TestMethodNode for: self compiledTestWithoutAssert2).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert2) withExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test100notAnonymous of: self class for: AnonymousTestRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: 0 equals: results size.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/5/2022 14:57:17'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:09:38'!
 test09RunWithExpectedFailureInTestAppearingDoesNotNotifyIt
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) andExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose')) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert) withExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/4/2022 18:58:48'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:10:58'!
 test10RunWithNotExpectedFailureAppearingNotifiesIt
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) andExpectedTestSmells: Array new forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert) withExpectedTestSmells: Array new.
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test is an Anonymous Test' equals: results first message..! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/5/2022 14:56:41'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:12:59'!
 test11RunWithExpectedFailureInCategoryAppearingDoesNotNotifyIt
 
-	| aTestLint results aClass |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	| aTestLint results aClass aNode expectedTestSmells |
 	aClass := self class.
+	expectedTestSmells := Array with: (ExpectedTestSmell inCategory: #'test objects' of: aClass for: MixedSelectorsRule because: 'Testing purpose').
+	aNode := MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization.
+	aTestLint := TestLint withRules: (Array with: MixedSelectorsRule new) andExpectedTestSmells: expectedTestSmells forNode: aNode.
 	
-	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization) withExpectedTestSmells: (Array with: (ExpectedTestSmell inCategory: #'test objects' of: aClass for: MixedSelectorsRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:59:22'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:14:50'!
 test12RunWithMethodCategoryRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	aTestLint := TestLint withRules: (Array with: MixedSelectorsRule new) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
-	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:24:43'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:15:34'!
 test13RunWithExpectedFailureInClassNotAppearingNotifiesIt
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)).
+	aTestLint := TestLint withRules: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)) andExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
-	results := aTestLint runNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')) withExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'TestLintTest was expected to violate MaxInstanceVariablesRule because Testing purpose' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:20:53'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:16:12'!
 test14RunWithMethodCategoryRuleOverMethodCategoryNodeIsOK
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: MixedSelectorsRule new).
+	aTestLint := TestLint withRules: (Array with: MixedSelectorsRule new) forNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
 	
-	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
+	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
 	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:22:04'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:16:41'!
 test15RunWithClassRuleOverClassNodeIsOK
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: (MaxInstanceVariablesRule withThreshold: 0)).
+	aTestLint := TestLint withRules: (Array with: (MaxInstanceVariablesRule withThreshold: 0)) forNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
 	
-	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/8/2022 20:39:14'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:17:20'!
 test16RunWithExpectedFailureButTestIsNotRunIsOK
 
 	| aTestLint results |
-	aTestLint := TestLint with: (Array with: AnonymousTestRule new).
+	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) andExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose')) forNode: (TestMethodNode for: self compiledTestWithoutAssert2).
 	
-	results := aTestLint runNode: (TestMethodNode for: self compiledTestWithoutAssert2) withExpectedTestSmells: (Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/10/2022 09:16:56'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:18:58'!
 test17RunWithExpectedFailureInClassDoesNotNotififyItIfItRunsAMethodCategoryNode
 
-	| aTestLint results aClass |
-	aTestLint := TestLint with: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)).
+	| aTestLint results aClass aNode expectedTestLintFailures |
 	aClass := self class.
+	expectedTestLintFailures := Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose').
+	aNode := MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization.
+	aTestLint := TestLint withRules: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)) andExpectedTestSmells: expectedTestLintFailures forNode: aNode.
 	
-	results := aTestLint runNode: (MethodCategoryNode for: #'test objects' of: aClass categorizedWith: aClass organization) withExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')).
+	results := aTestLint run.
 	
 	self assert: results isEmpty.! !
 
@@ -900,12 +904,12 @@ messageListMenuOptions
 		} asDictionary.
 	   }`.! !
 
-!TestLintRunner methodsFor: 'initialization' stamp: 'FL 6/5/2022 16:48:05'!
+!TestLintRunner methodsFor: 'initialization' stamp: 'FL 6/19/2022 17:01:24'!
 initializeRun: aNode 
 	
 	| testLintFailures expectedTestSmells |
 	expectedTestSmells := self getExpectedTestSmellsOf: aNode linkedClass.
-	testLintFailures := (TestLint with: (self class testRules)) runNode: aNode withExpectedTestSmells: expectedTestSmells.
+	testLintFailures := (TestLint withRules: (self class testRules) andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
 	TestLintResultWindow displayTestLintResultFrom: testLintFailures.! !
 
 !TestLintRunner methodsFor: 'accessing' stamp: 'FL 6/5/2022 17:21:48'!
@@ -1346,36 +1350,34 @@ errorInvalidThreshold
 
 	^ self error: self invalidThresholdDescription! !
 
-!TestLint methodsFor: 'initialization' stamp: 'FL 4/10/2022 18:30:40'!
-initializeWith: aCollectionOfRules 
+!TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
+initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
 	
-	rules := aCollectionOfRules.! !
+	rules := aRuleCollection.
+	expectedFailures := anExpectedFailuresCollection.
+	node := aNode.! !
 
 !TestLint methodsFor: 'testing' stamp: 'FL 6/4/2022 17:47:39'!
 hasRule: aRuleClass 
 	^rules anySatisfy: [:rule | rule class = aRuleClass]! !
 
-!TestLint methodsFor: 'converting' stamp: 'FL 6/5/2022 16:02:39'!
-convertToMissingTestSmells: notSatisfiedExpectations
+!TestLint methodsFor: 'converting' stamp: 'FL 6/23/2022 19:45:22'!
+convertToMissingTestSmells: notSatisfiedExpectationsCollection
 
-	^ notSatisfiedExpectations collect: [:anExpectedTestSmell |
+	^ notSatisfiedExpectationsCollection collect: [:anExpectedTestSmell |
 		 anExpectedTestSmell asMissingTestSmell]! !
 
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/5/2022 16:02:04'!
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:19'!
 checkExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells 
 	
-	| notExpectedTestSmells notSatisfiedExpectations temp |
-	
-	temp := self getNotExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells.
-	notExpectedTestSmells := temp first.
-	notSatisfiedExpectations := temp second.
+	self getNotExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells.
 	
 	^notExpectedTestSmells , (self convertToMissingTestSmells: notSatisfiedExpectations) ! !
 
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/5/2022 15:54:44'!
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:30'!
 getNotExpectedFailures: aCollectionOfExpectedTestSmells over: aCollectionOfTestSmells 
 	
-	| notExpectedTestSmells satisfiedExpectations notSatisfiedExpectations |
+	|  satisfiedExpectations  |
 	
 	notExpectedTestSmells := OrderedCollection new.
 	satisfiedExpectations := OrderedCollection new.
@@ -1391,22 +1393,19 @@ getNotExpectedFailures: aCollectionOfExpectedTestSmells over: aCollectionOfTestS
 			notExpectedTestSmells add: testSmell 
 			].
 		].
-	notSatisfiedExpectations := self selectSatisfiedExpectations: satisfiedExpectations from: aCollectionOfExpectedTestSmells.
-	
-	^{notExpectedTestSmells. notSatisfiedExpectations}.! !
+	notSatisfiedExpectations := self selectSatisfiedExpectations: satisfiedExpectations from: aCollectionOfExpectedTestSmells.! !
 
-!TestLint methodsFor: 'evaluating' stamp: 'FL 5/10/2022 22:19:39'!
-runNode: aNode
-
-	^ rules collect: [:rule | rule runNode: aNode] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
-
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/8/2022 20:46:12'!
-runNode: aNode withExpectedTestSmells: anExpectedFailureCollection 
-	
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:20:39'!
+run
 	| expectedTestSmellsOfRunRules effectiveExpectedTestSmells |
-	expectedTestSmellsOfRunRules := self selectExpectedTestSmellsOfRunRules: anExpectedFailureCollection.
-	effectiveExpectedTestSmells := self selectExpectedTestSmells: expectedTestSmellsOfRunRules ofRunNode: aNode.
-	^self checkExpectedFailures: effectiveExpectedTestSmells over: (self runNode: aNode)! !
+	expectedTestSmellsOfRunRules := self selectExpectedTestSmellsOfRunRules: expectedFailures.
+	effectiveExpectedTestSmells := self selectExpectedTestSmells: expectedTestSmellsOfRunRules ofRunNode: node.
+	^self checkExpectedFailures: effectiveExpectedTestSmells over: (self runNode)! !
+
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:21:36'!
+runNode
+
+	^ rules collect: [:rule | rule runNode: node] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
 
 !TestLint methodsFor: 'select' stamp: 'FL 6/10/2022 09:05:50'!
 selectExpectedTestSmells: anExpectedTestSmellCollection ofRunNode: aNode
@@ -1424,10 +1423,15 @@ selectSatisfiedExpectations: aSubcollectionOfExpectedTestSmells from: aCollectio
 	^ aCollectionOfExpectedTestSmells select: [:anExpectedFailure | 
 		(aSubcollectionOfExpectedTestSmells includes: anExpectedFailure) not]! !
 
-!TestLint class methodsFor: 'instance creation' stamp: 'FL 4/10/2022 16:46:40'!
-with: rules 
+!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:31'!
+withRules: aRuleCollection andExpectedTestSmells: anExpectedFailureCollection forNode: aNode
 	
-	^self new initializeWith: rules ! !
+	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailureCollection forNode: aNode! !
+
+!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:53'!
+withRules: aRuleCollection forNode: aNode
+	
+	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: Array new forNode: aNode! !
 
 !TestLintFailure methodsFor: 'accessing' stamp: 'FL 6/4/2022 16:08:40'!
 message
