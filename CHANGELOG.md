@@ -7,6 +7,7 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.10...HEAD)
 ### Changed
 - TestLint is now run as a "Method Object".
+- Method "expectedTestLintFailures" now uses ExpectedTestSmellInformation in order to remove redundant "self class" in method.
 
 ## [1.10](https://github.com/Garuflax/cuis-testlint/compare/v1.9...v1.10) - 2022-06-10
 ### Added

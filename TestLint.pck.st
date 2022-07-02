@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 23 June 2022 at 7:46:11 pm'!
+'From Cuis 6.0 [latest update: #5093] on 2 July 2022 at 12:42:08 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 11!
+!provides: 'TestLint' 1 12!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -25,6 +25,16 @@ TestCase subclass: #AnonymousTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'AnonymousTestRuleTest class' category: 'TestLint-Tests'!
 AnonymousTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #ExpectedTestSmellInformationTest category: 'TestLint-Tests'!
+TestCase subclass: #ExpectedTestSmellInformationTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'ExpectedTestSmellInformationTest class' category: 'TestLint-Tests'!
+ExpectedTestSmellInformationTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #GuardedTestRuleTest category: 'TestLint-Tests'!
@@ -125,6 +135,16 @@ Object subclass: #ExpectedTestSmell
 	category: 'TestLint-Model'!
 !classDefinition: 'ExpectedTestSmell class' category: 'TestLint-Model'!
 ExpectedTestSmell class
+	instanceVariableNames: ''!
+
+!classDefinition: #ExpectedTestSmellInformation category: 'TestLint-Model'!
+Object subclass: #ExpectedTestSmellInformation
+	instanceVariableNames: 'selector ruleClass description symbol'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'ExpectedTestSmellInformation class' category: 'TestLint-Model'!
+ExpectedTestSmellInformation class
 	instanceVariableNames: ''!
 
 !classDefinition: #Node category: 'TestLint-Model'!
@@ -440,10 +460,50 @@ testSm
 
 	Object new.! !
 
-!AnonymousTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 6/5/2022 17:43:11'!
+!AnonymousTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:34:37'!
 expectedTestSmells
 
-	^Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmell inTest: #test100 of: self class for: AnonymousTestRule because: 'Testing purpose')! !
+	^Array with: (ExpectedTestSmellInformation in: #test for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test100 for: AnonymousTestRule because: 'Testing purpose')! !
+
+!ExpectedTestSmellInformationTest methodsFor: 'tests' stamp: 'FL 7/2/2022 12:07:56'!
+test01ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodRule
+
+	| methodSymbol anExpectedTestSmellInformation result expected |
+	methodSymbol := #test01ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodRule.
+	anExpectedTestSmellInformation := ExpectedTestSmellInformation in: methodSymbol for: AnonymousTestRule because: 'testing purpose'.
+	expected := ExpectedTestSmell inTest: methodSymbol of: self class for: AnonymousTestRule because: 'testing purpose'.
+	
+	result := anExpectedTestSmellInformation asExpectedTestSmellForClass: self class.
+	
+	self assert: expected equals: result.! !
+
+!ExpectedTestSmellInformationTest methodsFor: 'tests' stamp: 'FL 7/2/2022 12:21:44'!
+test02ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodCategoryRule
+
+	| categorySymbol anExpectedTestSmellInformation result expected categoryRule description |
+	categorySymbol := #tests.
+	categoryRule := MixedSelectorsRule.
+	description := 'testing purpose'.
+	anExpectedTestSmellInformation := ExpectedTestSmellInformation in: categorySymbol for: categoryRule because: description.
+	expected := ExpectedTestSmell inCategory: categorySymbol of: self class for: categoryRule because: description.
+	
+	result := anExpectedTestSmellInformation asExpectedTestSmellForClass: self class.
+	
+	self assert: expected equals: result.! !
+
+!ExpectedTestSmellInformationTest methodsFor: 'tests' stamp: 'FL 7/2/2022 12:27:43'!
+test03ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodClassRule
+
+	| classSymbol anExpectedTestSmellInformation result expected classRule description |
+	classSymbol := #ExpectedTestSmellInformationTest.
+	classRule := MaxInstanceVariablesRule.
+	description := 'testing purpose'.
+	anExpectedTestSmellInformation := ExpectedTestSmellInformation in: classSymbol for: classRule because: description.
+	expected := ExpectedTestSmell inClass: classSymbol for: classRule because: description.
+	
+	result := anExpectedTestSmellInformation asExpectedTestSmellForClass: self class.
+	
+	self assert: expected equals: result.! !
 
 !GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:06:46'!
 test01TestWithoutConditionalIsNotAGuardedTest
@@ -526,10 +586,10 @@ compiledTestWithIfTrueIfFalse
 
 	^ self class compiledMethodAt: #testWithIfTrueIfFalse! !
 
-!GuardedTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 6/5/2022 17:32:25'!
+!GuardedTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:35:27'!
 expectedTestSmells
 
-	^Array with: (ExpectedTestSmell inTest: #testWithIfFalse of: self class for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmell inTest: #testWithIfTrue of: self class for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmell inTest: #testWithIfTrueIfFalse of: self class for: GuardedTestRule because: 'Testing purpose')! !
+	^Array with: (ExpectedTestSmellInformation in: #testWithIfFalse for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithIfTrue for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithIfTrueIfFalse for: GuardedTestRule because: 'Testing purpose')! !
 
 !LongTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:11:47'!
 test01LongTestRuleNotSatisfied
@@ -624,10 +684,10 @@ test03CategoryWithoutMixedSelectors
 	
 	self assert: 0 equals: results size.! !
 
-!MixedSelectorsRuleTest methodsFor: 'expected test smells' stamp: 'FL 6/5/2022 17:38:15'!
+!MixedSelectorsRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:36:19'!
 expectedTestSmells
 
-	^Array with: (ExpectedTestSmell inCategory: #'test objects mixed' of: self class for: MixedSelectorsRule because: 'Testing purpose')! !
+	^Array with: (ExpectedTestSmellInformation in: #'test objects mixed' for: MixedSelectorsRule because: 'Testing purpose')! !
 
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
@@ -842,10 +902,10 @@ test100notAnonymous
 
 	Object new.! !
 
-!TestLintTest methodsFor: 'expected test smells' stamp: 'FL 6/5/2022 17:41:10'!
+!TestLintTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:37:04'!
 expectedTestSmells
 
-	^Array with: (ExpectedTestSmell inTest: #test of: self class for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmell inCategory: #'test objects' of: self class for: MixedSelectorsRule because: 'Testing purpose')! !
+	^Array with: (ExpectedTestSmellInformation in: #test for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #'test objects' for: MixedSelectorsRule because: 'Testing purpose')! !
 
 !TestMethodNodeTest methodsFor: 'test objects' stamp: 'FL 5/29/2022 16:28:35'!
 compiledMethod
@@ -912,12 +972,13 @@ initializeRun: aNode
 	testLintFailures := (TestLint withRules: (self class testRules) andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
 	TestLintResultWindow displayTestLintResultFrom: testLintFailures.! !
 
-!TestLintRunner methodsFor: 'accessing' stamp: 'FL 6/5/2022 17:21:48'!
+!TestLintRunner methodsFor: 'accessing' stamp: 'FL 7/2/2022 12:31:57'!
 getExpectedTestSmellsOf: aClass 
 	
-	| expectedTestSmellsMethod |
+	| expectedTestSmellsMethod expectedTestSmellInformationCollection |
 	expectedTestSmellsMethod := aClass compiledMethodAt: #expectedTestSmells ifAbsent: [^#()].
-	^expectedTestSmellsMethod valueWithReceiver: aClass new arguments: #()! !
+	expectedTestSmellInformationCollection := expectedTestSmellsMethod valueWithReceiver: nil arguments: #().
+	^expectedTestSmellInformationCollection collect: [:expectedTestSmellInformation | expectedTestSmellInformation asExpectedTestSmellForClass: aClass].! !
 
 !TestLintRunner class methodsFor: 'instance creation' stamp: 'FL 4/14/2022 18:27:37'!
 run: aNode 
@@ -961,6 +1022,14 @@ asMissingTestSmell
 
 	^MissingTestSmell withNode: node andRule: ruleClass because: description! !
 
+!ExpectedTestSmell methodsFor: 'comparing' stamp: 'FL 7/2/2022 12:18:38'!
+= other
+
+	^node = other node and: [
+		ruleClass = other ruleClass and: [
+			description = other description ]
+		]! !
+
 !ExpectedTestSmell class methodsFor: 'instance creation' stamp: 'FL 6/5/2022 14:45:53'!
 inCategory: aSymbol of: aClass for: aMethodCategoryRuleClass because: aDescription 
 	
@@ -982,6 +1051,29 @@ inTest: aSymbol of: aClass for: aMethodRuleClass because: aDescription
 	
 	testMethodNode _ TestMethodNode for: (aClass compiledMethodAt: aSymbol).
 	^self new initializeIn: testMethodNode for: aMethodRuleClass because: aDescription ! !
+
+!ExpectedTestSmellInformation methodsFor: 'converting' stamp: 'FL 7/2/2022 12:27:21'!
+asExpectedTestSmellForClass: aClass
+
+	(ruleClass inheritsFrom: MethodRule) ifTrue: [^ExpectedTestSmell inTest: symbol of: aClass for: ruleClass because: description ].
+	
+	(ruleClass inheritsFrom: MethodCategoryRule ) ifTrue: [^ExpectedTestSmell inCategory: symbol of: aClass for: ruleClass because: description ].
+	
+	(ruleClass inheritsFrom: ClassRule ) ifTrue: [^ExpectedTestSmell inClass: symbol for: ruleClass because: description ]. ! !
+
+!ExpectedTestSmellInformation methodsFor: 'initialization' stamp: 'FL 7/2/2022 12:04:31'!
+initializeIn: aSymbol for: aRuleClass because: aDescription 
+	
+	symbol := aSymbol.
+	ruleClass := aRuleClass.
+	description := aDescription.! !
+
+!ExpectedTestSmellInformation class methodsFor: 'instance creation' stamp: 'FL 7/2/2022 11:52:52'!
+in: aSymbol for: aRuleClass because: aDescription 
+	
+	
+	
+	^self new initializeIn: aSymbol for: aRuleClass because: aDescription ! !
 
 !Node methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:19:46'!
 applyRule: aRule 
