@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 2 July 2022 at 12:42:08 pm'!
+'From Cuis 6.0 [latest update: #5093] on 3 July 2022 at 4:16:49 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 12!
+!provides: 'TestLint' 1 13!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -25,6 +25,16 @@ TestCase subclass: #AnonymousTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'AnonymousTestRuleTest class' category: 'TestLint-Tests'!
 AnonymousTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #AssertionlessTestRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #AssertionlessTestRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'AssertionlessTestRuleTest class' category: 'TestLint-Tests'!
+AssertionlessTestRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #ExpectedTestSmellInformationTest category: 'TestLint-Tests'!
@@ -139,7 +149,7 @@ ExpectedTestSmell class
 
 !classDefinition: #ExpectedTestSmellInformation category: 'TestLint-Model'!
 Object subclass: #ExpectedTestSmellInformation
-	instanceVariableNames: 'selector ruleClass description symbol'
+	instanceVariableNames: 'ruleClass description symbol'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -255,6 +265,16 @@ MethodRule subclass: #AnonymousTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'AnonymousTestRule class' category: 'TestLint-Model'!
 AnonymousTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #AssertionlessTestRule category: 'TestLint-Model'!
+MethodRule subclass: #AssertionlessTestRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'AssertionlessTestRule class' category: 'TestLint-Model'!
+AssertionlessTestRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #GuardedTestRule category: 'TestLint-Model'!
@@ -440,30 +460,129 @@ compiledWellNamedTest
 
 	^ self class compiledMethodAt: #testSm! !
 
-!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 4/26/2022 20:10:48'!
+!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:08:23'!
 test
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
-!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 5/1/2022 16:22:34'!
+!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:08:14'!
 test100
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
-!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 4/26/2022 20:13:13'!
+!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:08:29'!
 test100notAnonymous
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
-!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 5/1/2022 16:11:29'!
+!AnonymousTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:08:35'!
 testSm
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
 !AnonymousTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:34:37'!
 expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #test for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test100 for: AnonymousTestRule because: 'Testing purpose')! !
+
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/2/2022 15:19:10'!
+test01TestWithAssertIsNotAnAssertionlessTest
+
+	| anAssetionlessTestRule result aTestMethodNode |
+	anAssetionlessTestRule := AssertionlessTestRule new.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test01TestWithAssertIsNotAnAssertionlessTest).
+	
+	result := anAssetionlessTestRule runMethod: (aTestMethodNode).
+	
+	self assert: 0 equals: result size.! !
+
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/2/2022 15:33:35'!
+test02TestWithoutAssertIsAnAssertionlessTest
+
+	| anAssetionlessTestRule result aTestMethodNode |
+	anAssetionlessTestRule := AssertionlessTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
+	
+	result := anAssetionlessTestRule runMethod: (aTestMethodNode).
+	
+	self assert: 1 equals: result size.
+	self assert: 'testWithoutAssert is an Assertionless Test' equals: result first message.! !
+
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/2/2022 15:47:55'!
+test03TestWithCustomAssertIsNotAnAssertionlessTest
+
+	| anAssetionlessTestRule result aTestMethodNode |
+	anAssetionlessTestRule := AssertionlessTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithCustomAssert.
+	
+	result := anAssetionlessTestRule runMethod: (aTestMethodNode).
+	
+	self assert: 0 equals: result size.! !
+
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/3/2022 15:33:52'!
+test04TestWithRecursiveCustomAssertIsNotAnAssertionlessTest
+
+    | anAssetionlessTestRule result aTestMethodNode |
+    anAssetionlessTestRule := AssertionlessTestRule new.
+    aTestMethodNode := TestMethodNode for: self compiledTestWithRecursiveCustomAssert.
+    
+    result := anAssetionlessTestRule runMethod: (aTestMethodNode).
+    
+    self assert: 0 equals: result size.! !
+
+!AssertionlessTestRuleTest methodsFor: 'assertions' stamp: 'FL 7/2/2022 15:47:13'!
+assertIsEven: aNumber
+
+	self assert: aNumber even! !
+
+!AssertionlessTestRuleTest methodsFor: 'assertions' stamp: 'FL 7/3/2022 15:34:33'!
+assertIsEvenAndPositiveRecursive: aSmallInteger 
+    
+    aSmallInteger <= 0 ifTrue: [self deny: aSmallInteger negative ] ifFalse: [self assertIsEvenAndPositiveRecursive: aSmallInteger - 2]! !
+
+!AssertionlessTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/2/2022 15:46:46'!
+testWithCustomAssert
+
+	| aNumber |
+	aNumber := 2.
+	
+	self assertIsEven: aNumber.! !
+
+!AssertionlessTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 15:34:24'!
+testWithRecursiveCustomAssert
+
+    | aNumber |
+    aNumber := 2.
+    
+    self assertIsEvenAndPositiveRecursive: aNumber.! !
+
+!AssertionlessTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/2/2022 15:25:41'!
+testWithoutAssert
+
+	| aNumber |
+	aNumber := 3.
+	
+	aNumber < 2 ifTrue: [self fail].! !
+
+!AssertionlessTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/2/2022 15:47:36'!
+compiledTestWithCustomAssert
+
+	^ self class compiledMethodAt: #testWithCustomAssert! !
+
+!AssertionlessTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/3/2022 15:34:04'!
+compiledTestWithRecursiveCustomAssert
+
+    ^ self class compiledMethodAt: #testWithRecursiveCustomAssert! !
+
+!AssertionlessTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/2/2022 15:32:07'!
+compiledTestWithoutAssert
+
+	^ self class compiledMethodAt: #testWithoutAssert! !
+
+!AssertionlessTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/3/2022 16:05:41'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose')! !
 
 !ExpectedTestSmellInformationTest methodsFor: 'tests' stamp: 'FL 7/2/2022 12:07:56'!
 test01ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodRule
@@ -571,17 +690,17 @@ testWithIfTrueIfFalse
 
 	3 > 4 ifTrue: [self fail] ifFalse: [self assert: 4 > 3].! !
 
-!GuardedTestRuleTest methodsFor: 'compiled methos' stamp: 'FL 5/8/2022 12:16:08'!
+!GuardedTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 5/8/2022 12:16:08'!
 compiledTestWithIfFalse
 
 	^ self class compiledMethodAt: #testWithIfFalse! !
 
-!GuardedTestRuleTest methodsFor: 'compiled methos' stamp: 'FL 5/8/2022 12:14:23'!
+!GuardedTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 5/8/2022 12:14:23'!
 compiledTestWithIfTrue
 
 	^ self class compiledMethodAt: #testWithIfTrue! !
 
-!GuardedTestRuleTest methodsFor: 'compiled methos' stamp: 'FL 5/8/2022 12:36:50'!
+!GuardedTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 5/8/2022 12:36:50'!
 compiledTestWithIfTrueIfFalse
 
 	^ self class compiledMethodAt: #testWithIfTrueIfFalse! !
@@ -892,15 +1011,15 @@ compiledTestWithoutAssert2
 
 	^ self class compiledMethodAt: #test100notAnonymous! !
 
-!TestLintTest methodsFor: 'test objects' stamp: 'FL 4/10/2022 16:59:58'!
+!TestLintTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:09:21'!
 test
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
-!TestLintTest methodsFor: 'test objects' stamp: 'FL 4/14/2022 19:13:23'!
+!TestLintTest methodsFor: 'test objects' stamp: 'FL 7/3/2022 16:09:26'!
 test100notAnonymous
 
-	Object new.! !
+	self assert: 3 equals: 3! !
 
 !TestLintTest methodsFor: 'expected test smells' stamp: 'FL 7/2/2022 12:37:04'!
 expectedTestSmells
@@ -985,10 +1104,19 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 6/8/2022 19:53:10'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/3/2022 16:15:09'!
 testRules
 
-	^ Array with: AnonymousTestRule new with: (LongTestRule withThreshold: 20) with: GuardedTestRule new with: MixedSelectorsRule new with: (MaxInstanceVariablesRule withThreshold: 10)! !
+	| rules |
+	rules := Array new: 6.
+	rules at: 1 put: AnonymousTestRule new.
+	rules at: 2 put: (LongTestRule withThreshold: 20).
+	rules at: 3 put: GuardedTestRule new.
+	rules at: 4 put: MixedSelectorsRule new.
+	rules at: 5 put: (MaxInstanceVariablesRule withThreshold: 10).
+	rules at: 6 put: AssertionlessTestRule new.
+
+	^ rules! !
 
 !ExpectedTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 16:46:20'!
 initializeIn: aNode for: aRuleClass because: aDescription 
@@ -1378,6 +1506,49 @@ isViolatedBy: aMethodNode
 !AnonymousTestRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:36:12'!
 violationMessage
 	^'is an Anonymous Test'! !
+
+!AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/3/2022 15:59:26'!
+getAllSelectorsCalledInClassHierarchy: aMethodNode 
+	
+	| allSelectorsCalledInClassHierarchy missingMethodNodesToVisit methodNodeClass |
+	methodNodeClass := aMethodNode methodClass.
+	allSelectorsCalledInClassHierarchy := OrderedCollection new.
+	missingMethodNodesToVisit := OrderedCollection with: aMethodNode.
+	
+	[missingMethodNodesToVisit notEmpty ] whileTrue: [| currentMethodNode |
+		currentMethodNode := missingMethodNodesToVisit removeFirst.
+		currentMethodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | node isMessageNode ifTrue: [
+									((node receiverOrCascadeReceiver isSelfPseudoVariable or: [node receiverOrCascadeReceiver isSuperPseudoVariable ]) and: [(allSelectorsCalledInClassHierarchy includes: node selectorSymbol) not]) ifTrue: [
+										missingMethodNodesToVisit add:( methodNodeClass withSuperclassThatIncludesSelector: node selectorSymbol do: [ :class | (class compiledMethodAt: node selectorSymbol) methodNode] ifNone: [(methodNodeClass compiledMethodAt: node selectorSymbol) methodNode])].
+									allSelectorsCalledInClassHierarchy add: node selectorSymbol.
+									 ]]
+							).
+		].
+	
+	^allSelectorsCalledInClassHierarchy ! !
+
+!AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/2/2022 18:59:55'!
+isViolatedBy: aTestMethodNode 
+
+	| selectorsCalledInClassHierarchy |
+	selectorsCalledInClassHierarchy := self getAllSelectorsCalledInClassHierarchy: aTestMethodNode methodNode.
+							
+	^selectorsCalledInClassHierarchy noneSatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
+
+!AssertionlessTestRule methodsFor: 'testing' stamp: 'FL 7/2/2022 15:39:26'!
+isAssertionSelectorSymbol: selectorSymbol
+
+	^ self class assertionSelectors includes: selectorSymbol ! !
+
+!AssertionlessTestRule class methodsFor: 'selectors list' stamp: 'FL 7/3/2022 16:00:41'!
+assertionSelectors
+
+	^Array with: #assert:description: with: #assert:! !
+
+!AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 7/2/2022 15:42:59'!
+violationMessage
+	^'is an Assertionless Test'! !
 
 !GuardedTestRule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
 isViolatedBy: aMethodNode

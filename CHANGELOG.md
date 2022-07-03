@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.10...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.13...HEAD)
+
+## [1.13](https://github.com/Garuflax/cuis-testlint/compare/v1.10...v1.13) - 2022-07-03
+### Added
+- Rule for detecting assertionless test.
+
 ### Changed
 - TestLint is now run as a "Method Object".
 - Method "expectedTestLintFailures" now uses ExpectedTestSmellInformation in order to remove redundant "self class" in method.
