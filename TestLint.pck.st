@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 3 July 2022 at 4:16:49 pm'!
+'From Cuis 6.0 [latest update: #5093] on 11 July 2022 at 8:25:46 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 13!
+!provides: 'TestLint' 1 14!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -87,6 +87,16 @@ TestCase subclass: #MixedSelectorsRuleTest
 MixedSelectorsRuleTest class
 	instanceVariableNames: ''!
 
+!classDefinition: #ProperOrganizationTestRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #ProperOrganizationTestRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'ProperOrganizationTestRuleTest class' category: 'TestLint-Tests'!
+ProperOrganizationTestRuleTest class
+	instanceVariableNames: ''!
+
 !classDefinition: #TestClassNodeTest category: 'TestLint-Tests'!
 TestCase subclass: #TestClassNodeTest
 	instanceVariableNames: ''
@@ -135,6 +145,16 @@ Object subclass: #TestLintRunner
 	category: 'TestLint-GUI'!
 !classDefinition: 'TestLintRunner class' category: 'TestLint-GUI'!
 TestLintRunner class
+	instanceVariableNames: ''!
+
+!classDefinition: #AssertionChecker category: 'TestLint-Model'!
+Object subclass: #AssertionChecker
+	instanceVariableNames: 'messageNode class missingMethodNodesToVisit allSelectorsCalledInClassHierarchy'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'AssertionChecker class' category: 'TestLint-Model'!
+AssertionChecker class
 	instanceVariableNames: ''!
 
 !classDefinition: #ExpectedTestSmell category: 'TestLint-Model'!
@@ -295,6 +315,16 @@ MethodRule subclass: #LongTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'LongTestRule class' category: 'TestLint-Model'!
 LongTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #ProperOrganizationTestRule category: 'TestLint-Model'!
+MethodRule subclass: #ProperOrganizationTestRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'ProperOrganizationTestRule class' category: 'TestLint-Model'!
+ProperOrganizationTestRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLint category: 'TestLint-Model'!
@@ -808,6 +838,56 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #'test objects mixed' for: MixedSelectorsRule because: 'Testing purpose')! !
 
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:14:26'!
+test01AllAssertsAtTheEndOfTheTestSatisfiesProperOrganizationTestRule
+
+	| aProperOrganizationTestRule aTestMethodNode result resultSize |
+	aProperOrganizationTestRule := ProperOrganizationTestRule new.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test01AllAssertsAtTheEndOfTheTestSatisfiesProperOrganizationTestRule).
+	
+	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
+	
+	resultSize _ result size.
+	self assert: 0 equals: resultSize.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:15:13'!
+test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule
+
+	| aProperOrganizationTestRule aTestMethodNode result expectedTestSmell |
+	aProperOrganizationTestRule := ProperOrganizationTestRule new.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule).
+	
+	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	expectedTestSmell := TestSmell withNode: aTestMethodNode andRule: aProperOrganizationTestRule.
+	self assert: expectedTestSmell message equals: result first message.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:19:19'!
+test03TestWithoutAssertSatisfiesProperOrganizationTestRule
+
+	| aProperOrganizationTestRule aTestMethodNode result resultSize |
+	aProperOrganizationTestRule := ProperOrganizationTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
+	
+	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
+	
+	resultSize _ result size.
+	self assert: 0 equals: resultSize.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/11/2022 20:16:47'!
+testWithoutAssert
+
+	| aNumber |
+	aNumber := 3.
+	
+	aNumber < 2 ifTrue: [self fail].! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/11/2022 20:17:27'!
+compiledTestWithoutAssert
+
+	^ self class compiledMethodAt: #testWithoutAssert! !
+
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
 
@@ -1117,6 +1197,59 @@ testRules
 	rules at: 6 put: AssertionlessTestRule new.
 
 	^ rules! !
+
+!AssertionChecker methodsFor: 'initialization' stamp: 'FL 7/10/2022 21:19:21'!
+initializeFor: aMessageNode ofClass: aClass 
+	
+	messageNode := aMessageNode.
+	class := aClass.! !
+
+!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 7/11/2022 20:06:32'!
+check
+	
+	(self isAssertionSelectorSymbol: messageNode selectorSymbol) ifTrue: [^true].
+	
+	missingMethodNodesToVisit := OrderedCollection new.
+	allSelectorsCalledInClassHierarchy := OrderedCollection new.
+	
+	(self isSelfOrSuperPseudoVariable: messageNode receiverOrCascadeReceiver) ifTrue: [
+		missingMethodNodesToVisit add: (self getMethodNodeInClassHierarchyForSelectorSymbol: messageNode selectorSymbol)].
+	
+	[missingMethodNodesToVisit notEmpty ] whileTrue: [| currentMethodNode |
+		currentMethodNode := missingMethodNodesToVisit removeFirst.
+		currentMethodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | node isMessageNode ifTrue: [
+									((self isSelfOrSuperPseudoVariable: node receiverOrCascadeReceiver) and: [(allSelectorsCalledInClassHierarchy includes: node selectorSymbol) not]) ifTrue: [
+										missingMethodNodesToVisit add:(  self getMethodNodeInClassHierarchyForSelectorSymbol: node selectorSymbol )].
+									allSelectorsCalledInClassHierarchy add: node selectorSymbol.
+									 ]]
+							).
+		].
+	
+	^allSelectorsCalledInClassHierarchy anySatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
+
+!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 7/11/2022 19:40:27'!
+getMethodNodeInClassHierarchyForSelectorSymbol: aSymbol 
+	^((class whichClassIncludesSelector: aSymbol) compiledMethodAt: aSymbol) methodNode! !
+
+!AssertionChecker methodsFor: 'testing' stamp: 'FL 7/11/2022 19:05:29'!
+isAssertionSelectorSymbol: selectorSymbol
+
+	^ self class assertionSelectors includes: selectorSymbol ! !
+
+!AssertionChecker methodsFor: 'testing' stamp: 'FL 7/11/2022 19:17:45'!
+isSelfOrSuperPseudoVariable: receiver 
+	^receiver isSelfPseudoVariable or: [receiver isSuperPseudoVariable ]! !
+
+!AssertionChecker class methodsFor: 'instance creation' stamp: 'FL 7/10/2022 21:19:02'!
+for: aMessageNode ofClass: aClass 
+	
+	^self new initializeFor: aMessageNode ofClass: aClass ! !
+
+!AssertionChecker class methodsFor: 'selectors list' stamp: 'FL 7/11/2022 19:06:03'!
+assertionSelectors
+
+	^Array with: #assert:description: with: #assert:! !
 
 !ExpectedTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 16:46:20'!
 initializeIn: aNode for: aRuleClass because: aDescription 
@@ -1528,23 +1661,27 @@ getAllSelectorsCalledInClassHierarchy: aMethodNode
 	
 	^allSelectorsCalledInClassHierarchy ! !
 
-!AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/2/2022 18:59:55'!
+!AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/11/2022 20:23:09'!
 isViolatedBy: aTestMethodNode 
 
-	| selectorsCalledInClassHierarchy |
-	selectorsCalledInClassHierarchy := self getAllSelectorsCalledInClassHierarchy: aTestMethodNode methodNode.
+	| linkedClass |
+	
+	linkedClass := aTestMethodNode linkedClass.
+	aTestMethodNode methodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | node isMessageNode ifTrue: [
+									(self isAnAssertion: node forClass: linkedClass) ifTrue: [
+									^false]
+								]]).
 							
-	^selectorsCalledInClassHierarchy noneSatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
+	^true.! !
 
-!AssertionlessTestRule methodsFor: 'testing' stamp: 'FL 7/2/2022 15:39:26'!
-isAssertionSelectorSymbol: selectorSymbol
-
-	^ self class assertionSelectors includes: selectorSymbol ! !
-
-!AssertionlessTestRule class methodsFor: 'selectors list' stamp: 'FL 7/3/2022 16:00:41'!
-assertionSelectors
-
-	^Array with: #assert:description: with: #assert:! !
+!AssertionlessTestRule methodsFor: 'testing' stamp: 'FL 7/11/2022 20:23:57'!
+isAnAssertion: aMethodNode forClass: aClass
+	
+	| anAssertionChecker |
+	anAssertionChecker := AssertionChecker for: aMethodNode ofClass: aClass.
+	
+	^anAssertionChecker check.! !
 
 !AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 7/2/2022 15:42:59'!
 violationMessage
@@ -1612,6 +1749,34 @@ invalidThresholdDescription
 errorInvalidThreshold
 
 	^ self error: self invalidThresholdDescription! !
+
+!ProperOrganizationTestRule methodsFor: 'testing' stamp: 'FL 7/11/2022 19:46:38'!
+isAnAssertion: aMethodNode forClass: aClass
+	
+	| anAssertionChecker |
+	anAssertionChecker := AssertionChecker for: aMethodNode ofClass: aClass.
+	
+	^anAssertionChecker check.! !
+
+!ProperOrganizationTestRule methodsFor: 'execution' stamp: 'FL 7/11/2022 20:19:58'!
+isViolatedBy: aMethodNode
+	
+	| hasAssertSectionStarted linkedClass |
+	
+	hasAssertSectionStarted := false.
+	linkedClass := aMethodNode linkedClass.
+	aMethodNode methodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | node isMessageNode ifTrue: [
+									(self isAnAssertion: node forClass: linkedClass) ifTrue: [
+									hasAssertSectionStarted ifFalse: [hasAssertSectionStarted := true]]
+								ifFalse: [
+									hasAssertSectionStarted ifTrue: [^true]]]]).
+							
+	^false.! !
+
+!ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 7/11/2022 19:51:03'!
+violationMessage
+	^'does not have a Proper Organization'! !
 
 !TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
 initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
