@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.14...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.15...HEAD)
+
+## [1.15](https://github.com/Garuflax/cuis-testlint/compare/v1.14...v1.15) - 2022-07-17
+### Added
+- Rule for detecting tests that do ```assert: a = b``` instead of ```assert: a equals: b```.
 
 ## [1.14](https://github.com/Garuflax/cuis-testlint/compare/v1.13...v1.14) - 2022-07-11
 ### Added

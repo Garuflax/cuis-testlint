@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 11 July 2022 at 8:25:46 pm'!
+'From Cuis 6.0 [latest update: #5093] on 17 July 2022 at 6:15:41 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 14!
+!provides: 'TestLint' 1 15!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -125,6 +125,16 @@ TestCase subclass: #TestMethodNodeTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'TestMethodNodeTest class' category: 'TestLint-Tests'!
 TestMethodNodeTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #WrongAssertUsageTestRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #WrongAssertUsageTestRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'WrongAssertUsageTestRuleTest class' category: 'TestLint-Tests'!
+WrongAssertUsageTestRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLintBrowserMenus category: 'TestLint-GUI'!
@@ -325,6 +335,16 @@ MethodRule subclass: #ProperOrganizationTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'ProperOrganizationTestRule class' category: 'TestLint-Model'!
 ProperOrganizationTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #WrongAssertUsageTestRule category: 'TestLint-Model'!
+MethodRule subclass: #WrongAssertUsageTestRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'WrongAssertUsageTestRule class' category: 'TestLint-Model'!
+WrongAssertUsageTestRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLint category: 'TestLint-Model'!
@@ -888,6 +908,11 @@ compiledTestWithoutAssert
 
 	^ self class compiledMethodAt: #testWithoutAssert! !
 
+!ProperOrganizationTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/17/2022 18:13:21'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose')! !
+
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
 
@@ -1121,6 +1146,44 @@ test01CannotCreateTestMethodNodeWithoutATestMethod
 
 	self should: [TestMethodNode for: self compiledMethod] raise: Error withMessageText: TestMethodNode notATestMethodErrorDescription.! !
 
+!WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 7/17/2022 17:47:19'!
+test01AssertWithoutEqualSymbolIsCorrectUsage
+
+	| aWrongAssertUsageTestRule aTestMethodNode result |
+	aWrongAssertUsageTestRule := WrongAssertUsageTestRule new.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test01AssertWithoutEqualSymbolIsCorrectUsage).
+	
+	result := aWrongAssertUsageTestRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 7/17/2022 17:50:24'!
+test02AssertWithEqualSymbolIsIncorrectUsage
+
+	| aWrongAssertUsageTestRule aTestMethodNode result |
+	aWrongAssertUsageTestRule := WrongAssertUsageTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithWrongAssertUsage.
+	
+	result := aWrongAssertUsageTestRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aWrongAssertUsageTestRule ) message equals: result first message.! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/17/2022 17:49:47'!
+compiledTestWithWrongAssertUsage
+
+	^ self class compiledMethodAt: #testWithWrongAssertUsage! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/17/2022 17:50:12'!
+testWithWrongAssertUsage
+	
+	self assert: 3 = 3.! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/17/2022 18:11:53'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testWithWrongAssertUsage for: WrongAssertUsageTestRule because: 'Testing purpose')! !
+
 !TestLintBrowserMenus class methodsFor: 'browser menus' stamp: 'FL 5/29/2022 14:55:36'!
 classListMenuOptions
 
@@ -1184,17 +1247,18 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/3/2022 16:15:09'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/17/2022 18:08:52'!
 testRules
 
 	| rules |
-	rules := Array new: 6.
+	rules := Array new: 7.
 	rules at: 1 put: AnonymousTestRule new.
 	rules at: 2 put: (LongTestRule withThreshold: 20).
 	rules at: 3 put: GuardedTestRule new.
 	rules at: 4 put: MixedSelectorsRule new.
 	rules at: 5 put: (MaxInstanceVariablesRule withThreshold: 10).
 	rules at: 6 put: AssertionlessTestRule new.
+	rules at: 7 put: WrongAssertUsageTestRule new.
 
 	^ rules! !
 
@@ -1777,6 +1841,33 @@ isViolatedBy: aMethodNode
 !ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 7/11/2022 19:51:03'!
 violationMessage
 	^'does not have a Proper Organization'! !
+
+!WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
+hasEqualMessageAsArgument: aMethodNode
+
+	^ (aMethodNode arguments at: 1) selectorSymbol = #=! !
+
+!WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
+isAMessageWithWrongAssertUsage: aMethodNode 
+	^(self isAnAssertMessageNode: aMethodNode) and: [self hasEqualMessageAsArgument: aMethodNode]! !
+
+!WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:06:19'!
+isAnAssertMessageNode: aMethodNode 
+	^aMethodNode isMessageNode and: [aMethodNode selectorSymbol = #assert:]! !
+
+!WrongAssertUsageTestRule methodsFor: 'execution' stamp: 'FL 7/17/2022 17:53:38'!
+isViolatedBy: aMethodNode 
+	
+	aMethodNode methodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | (self isAMessageWithWrongAssertUsage: node) ifTrue: [
+									^true]]).
+							
+	^false.! !
+
+!WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 7/17/2022 18:03:49'!
+violationMessage
+	
+	^'should use the message #assert:equals:'! !
 
 !TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
 initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
