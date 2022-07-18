@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.15...HEAD)
+### Changed
+- ProperOrganizationTestRule now allows to pass messages as arguments to assertions.
 
 ## [1.15](https://github.com/Garuflax/cuis-testlint/compare/v1.14...v1.15) - 2022-07-17
 ### Added

@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 17 July 2022 at 6:15:41 pm'!
+'From Cuis 6.0 [latest update: #5093] on 18 July 2022 at 8:37:54 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 15!
+!provides: 'TestLint' 1 16!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -329,7 +329,7 @@ LongTestRule class
 
 !classDefinition: #ProperOrganizationTestRule category: 'TestLint-Model'!
 MethodRule subclass: #ProperOrganizationTestRule
-	instanceVariableNames: ''
+	instanceVariableNames: 'innerAssertionNodesMissing'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -858,17 +858,16 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #'test objects mixed' for: MixedSelectorsRule because: 'Testing purpose')! !
 
-!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:14:26'!
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/18/2022 20:12:16'!
 test01AllAssertsAtTheEndOfTheTestSatisfiesProperOrganizationTestRule
 
-	| aProperOrganizationTestRule aTestMethodNode result resultSize |
+	| aProperOrganizationTestRule aTestMethodNode result |
 	aProperOrganizationTestRule := ProperOrganizationTestRule new.
 	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test01AllAssertsAtTheEndOfTheTestSatisfiesProperOrganizationTestRule).
 	
 	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
 	
-	resultSize _ result size.
-	self assert: 0 equals: resultSize.! !
+	self assert: 0 equals: result size.! !
 
 !ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:15:13'!
 test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule
@@ -883,17 +882,16 @@ test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule
 	expectedTestSmell := TestSmell withNode: aTestMethodNode andRule: aProperOrganizationTestRule.
 	self assert: expectedTestSmell message equals: result first message.! !
 
-!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/11/2022 20:19:19'!
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 7/18/2022 20:12:00'!
 test03TestWithoutAssertSatisfiesProperOrganizationTestRule
 
-	| aProperOrganizationTestRule aTestMethodNode result resultSize |
+	| aProperOrganizationTestRule aTestMethodNode result |
 	aProperOrganizationTestRule := ProperOrganizationTestRule new.
 	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
 	
 	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
 	
-	resultSize _ result size.
-	self assert: 0 equals: resultSize.! !
+	self assert: 0 equals: result size.! !
 
 !ProperOrganizationTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/11/2022 20:16:47'!
 testWithoutAssert
@@ -908,10 +906,10 @@ compiledTestWithoutAssert
 
 	^ self class compiledMethodAt: #testWithoutAssert! !
 
-!ProperOrganizationTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/17/2022 18:13:21'!
+!ProperOrganizationTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 7/18/2022 20:36:22'!
 expectedTestSmells
 
-	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose')! !
+	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule for: ProperOrganizationTestRule because: 'Testing purpose')! !
 
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
@@ -1247,18 +1245,19 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/17/2022 18:08:52'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/18/2022 20:33:14'!
 testRules
 
 	| rules |
-	rules := Array new: 7.
+	rules := Array new: 8.
 	rules at: 1 put: AnonymousTestRule new.
 	rules at: 2 put: (LongTestRule withThreshold: 20).
 	rules at: 3 put: GuardedTestRule new.
 	rules at: 4 put: MixedSelectorsRule new.
 	rules at: 5 put: (MaxInstanceVariablesRule withThreshold: 10).
 	rules at: 6 put: AssertionlessTestRule new.
-	rules at: 7 put: WrongAssertUsageTestRule new.
+	rules at: 7 put: ProperOrganizationTestRule new.
+	rules at: 8 put: WrongAssertUsageTestRule new.
 
 	^ rules! !
 
@@ -1822,19 +1821,30 @@ isAnAssertion: aMethodNode forClass: aClass
 	
 	^anAssertionChecker check.! !
 
-!ProperOrganizationTestRule methodsFor: 'execution' stamp: 'FL 7/11/2022 20:19:58'!
+!ProperOrganizationTestRule methodsFor: 'testing' stamp: 'FL 7/18/2022 20:32:25'!
+isAnInnerAssertionNode
+
+	innerAssertionNodesMissing = 0 ifTrue: [
+		^false] ifFalse: [
+		innerAssertionNodesMissing := innerAssertionNodesMissing - 1].
+	^true ! !
+
+!ProperOrganizationTestRule methodsFor: 'execution' stamp: 'FL 7/18/2022 20:32:25'!
 isViolatedBy: aMethodNode
 	
 	| hasAssertSectionStarted linkedClass |
 	
+	innerAssertionNodesMissing := 0.
 	hasAssertSectionStarted := false.
 	linkedClass := aMethodNode linkedClass.
 	aMethodNode methodNode accept: (ParseNodeEnumerator
 							ofBlock: [:node | node isMessageNode ifTrue: [
 									(self isAnAssertion: node forClass: linkedClass) ifTrue: [
+										innerAssertionNodesMissing := node arguments size + 2.
 									hasAssertSectionStarted ifFalse: [hasAssertSectionStarted := true]]
 								ifFalse: [
-									hasAssertSectionStarted ifTrue: [^true]]]]).
+									hasAssertSectionStarted ifTrue: [^true]]]]
+							select: [:node | self isAnInnerAssertionNode not]).
 							
 	^false.! !
 
