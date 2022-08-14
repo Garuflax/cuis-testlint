@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.15...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.16...HEAD)
+
+## [1.16](https://github.com/Garuflax/cuis-testlint/compare/v1.15...v1.16) - 2022-08-14
+### Added
+- Rule for detecting tests with too many literals.
+
 ### Changed
 - ProperOrganizationTestRule now allows to pass messages as arguments to assertions.
 

@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 18 July 2022 at 8:37:54 pm'!
+'From Cuis 6.0 [latest update: #5093] on 14 August 2022 at 7:22:33 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 16!
+!provides: 'TestLint' 1 17!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -67,6 +67,16 @@ TestCase subclass: #LongTestRuleTest
 LongTestRuleTest class
 	instanceVariableNames: ''!
 
+!classDefinition: #MagicLiteralsTestRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #MagicLiteralsTestRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'MagicLiteralsTestRuleTest class' category: 'TestLint-Tests'!
+MagicLiteralsTestRuleTest class
+	instanceVariableNames: ''!
+
 !classDefinition: #MaxInstanceVariablesRuleTest category: 'TestLint-Tests'!
 TestCase subclass: #MaxInstanceVariablesRuleTest
 	instanceVariableNames: 'unused'
@@ -109,7 +119,7 @@ TestClassNodeTest class
 
 !classDefinition: #TestLintTest category: 'TestLint-Tests'!
 TestCase subclass: #TestLintTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'strictLongTestRule flexibleMaxInstanceVariablesRule'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
@@ -325,6 +335,16 @@ MethodRule subclass: #LongTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'LongTestRule class' category: 'TestLint-Model'!
 LongTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #MagicLiteralsTestRule category: 'TestLint-Model'!
+MethodRule subclass: #MagicLiteralsTestRule
+	instanceVariableNames: 'threshold'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'MagicLiteralsTestRule class' category: 'TestLint-Model'!
+MagicLiteralsTestRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #ProperOrganizationTestRule category: 'TestLint-Model'!
@@ -786,6 +806,82 @@ test03CannotCreateLostTestRuleWithNegativeThreshold
 
 	self should: [LongTestRule withThreshold: -1] raise: Error withMessageText: LongTestRule invalidThresholdDescription.! !
 
+!MagicLiteralsTestRuleTest methodsFor: 'tests' stamp: 'FL 8/14/2022 18:57:41'!
+test01NoLiteralsDoesNotViolateTheMagicLiteralsRule
+
+	| aMagicLiteralsTestRule aTestMethodNode result |
+	aMagicLiteralsTestRule := MagicLiteralsTestRule withThreshold: 0.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithNoLiterals.
+	
+	result := aMagicLiteralsTestRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty ! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:05:59'!
+test02ManyLiteralsViolateTheMagicLiteralsRule
+
+	| aMagicLiteralsTestRule aTestMethodNode result |
+	aMagicLiteralsTestRule := MagicLiteralsTestRule withThreshold: 3.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithManyLiterals.
+	
+	result := aMagicLiteralsTestRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aMagicLiteralsTestRule ) message equals: result first message.! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:03:25'!
+test03FewLiteralsDoesNotViolateTheMagicLiteralsRule
+
+	| aMagicLiteralsTestRule aTestMethodNode result |
+	aMagicLiteralsTestRule := MagicLiteralsTestRule withThreshold: 2.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithFewLiterals.
+	
+	result := aMagicLiteralsTestRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty ! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'tests' stamp: 'FL 8/14/2022 18:59:27'!
+test04CannotCreateMagicLiteralsTestRuleWithNegativeThreshold
+
+	self should: [MagicLiteralsTestRule withThreshold: -1] raise: Error withMessageText: MagicLiteralsTestRule invalidThresholdDescription.! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'test objects' stamp: 'FL 8/14/2022 18:47:23'!
+testWithFewLiterals
+
+	| aNumber anotherNumber |
+	aNumber _ 8.
+	anotherNumber _ 2.
+	self assert: aNumber + anotherNumber  equals: anotherNumber + aNumber.! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'test objects' stamp: 'FL 8/14/2022 19:06:25'!
+testWithManyLiterals
+
+	| aCollection |
+	aCollection _ OrderedCollection with: 2 with: 'ja' with: #je.
+	self assert: aCollection size equals: 3.! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'test objects' stamp: 'FL 8/14/2022 18:29:59'!
+testWithNoLiterals
+
+	| aCollection |
+	aCollection _ OrderedCollection new.
+	self assert: aCollection isEmpty ! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 8/14/2022 18:47:34'!
+compiledTestWithFewLiterals
+
+	^ self class compiledMethodAt: #testWithFewLiterals! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 8/14/2022 18:32:13'!
+compiledTestWithManyLiterals
+
+	^ self class compiledMethodAt: #testWithManyLiterals! !
+
+!MagicLiteralsTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 8/14/2022 18:28:47'!
+compiledTestWithNoLiterals
+
+	^ self class compiledMethodAt: #testWithNoLiterals! !
+
 !MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:21:03'!
 test01MaxInstanceVariablesRuleSatisfied
 
@@ -947,11 +1043,11 @@ test03RunWithRuleSatisfiedDoesNotReturnAnyDescription
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:04:31'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:15:25'!
 test04RunReturnsDescriptionForAllRulesThatWereNotSatisfied
 
 	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
 	
 	results := aTestLint run.
 	
@@ -959,11 +1055,11 @@ test04RunReturnsDescriptionForAllRulesThatWereNotSatisfied
 	self assert: 'test is a Long Test' equals: results first message.
 	self assert: 'test is an Anonymous Test' equals: results second message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:05:01'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:17:01'!
 test05RunWithMethodRuleOverMethodCategoryNodeAppliesItToEveryTestMethodInside
 
 	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: (LongTestRule withThreshold: 0) with: AnonymousTestRule new) forNode: (MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization).
+	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: AnonymousTestRule new) forNode: (MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization).
 	
 	results := aTestLint run.
 	
@@ -1049,11 +1145,11 @@ test12RunWithMethodCategoryRuleOverTestClassNodeAppliesItToEveryMethodCategoryIn
 	self assert: 1 equals: results size.
 	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:15:34'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:20:31'!
 test13RunWithExpectedFailureInClassNotAppearingNotifiesIt
 
 	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with:  (MaxInstanceVariablesRule withThreshold: 0)) andExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	aTestLint := TestLint withRules: (Array with:  flexibleMaxInstanceVariablesRule) andExpectedTestSmells: (Array with: (ExpectedTestSmell inClass: #TestLintTest for: MaxInstanceVariablesRule because: 'Testing purpose')) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
 	results := aTestLint run.
 	
@@ -1128,6 +1224,12 @@ test100notAnonymous
 expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #test for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #'test objects' for: MixedSelectorsRule because: 'Testing purpose')! !
+
+!TestLintTest methodsFor: 'initialization' stamp: 'FL 8/14/2022 19:20:15'!
+setUp
+	
+	strictLongTestRule := LongTestRule withThreshold: 0.
+	flexibleMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 2.! !
 
 !TestMethodNodeTest methodsFor: 'test objects' stamp: 'FL 5/29/2022 16:28:35'!
 compiledMethod
@@ -1245,11 +1347,11 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 7/18/2022 20:33:14'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 8/14/2022 19:07:37'!
 testRules
 
 	| rules |
-	rules := Array new: 8.
+	rules := Array new: 9.
 	rules at: 1 put: AnonymousTestRule new.
 	rules at: 2 put: (LongTestRule withThreshold: 20).
 	rules at: 3 put: GuardedTestRule new.
@@ -1258,6 +1360,7 @@ testRules
 	rules at: 6 put: AssertionlessTestRule new.
 	rules at: 7 put: ProperOrganizationTestRule new.
 	rules at: 8 put: WrongAssertUsageTestRule new.
+	rules at: 9 put: (MagicLiteralsTestRule withThreshold: 5).
 
 	^ rules! !
 
@@ -1809,6 +1912,50 @@ invalidThresholdDescription
 	^'threshold cannot be negative'! !
 
 !LongTestRule class methodsFor: 'error' stamp: 'FL 5/29/2022 15:19:58'!
+errorInvalidThreshold
+
+	^ self error: self invalidThresholdDescription! !
+
+!MagicLiteralsTestRule methodsFor: 'execution' stamp: 'FL 8/14/2022 19:02:44'!
+isViolatedBy: aTestMethodNode 
+	
+	| magicLiteralsAmount |
+	magicLiteralsAmount := 0.
+	aTestMethodNode methodNode accept: (ParseNodeEnumerator ofBlock: [:node | (self isMagicLiteral: node) ifTrue: [magicLiteralsAmount := magicLiteralsAmount + 1]
+		]).
+	
+	^magicLiteralsAmount > threshold ! !
+
+!MagicLiteralsTestRule methodsFor: 'testing' stamp: 'FL 8/14/2022 18:43:52'!
+isMagicLiteral: aNode 
+	^aNode isLiteralNode ! !
+
+!MagicLiteralsTestRule methodsFor: 'initialization' stamp: 'FL 8/14/2022 18:58:06'!
+initializeWithThreshold: aThreshold 
+	
+	threshold := aThreshold.! !
+
+!MagicLiteralsTestRule class methodsFor: 'message' stamp: 'FL 8/14/2022 18:44:38'!
+violationMessage
+	^'has too many literals'! !
+
+!MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 8/14/2022 18:50:14'!
+withThreshold: aThreshold 
+
+	self validThreshold: aThreshold.
+	
+	^self new initializeWithThreshold: aThreshold ! !
+
+!MagicLiteralsTestRule class methodsFor: 'assertions' stamp: 'FL 8/14/2022 18:50:39'!
+validThreshold: aThreshold
+
+	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
+
+!MagicLiteralsTestRule class methodsFor: 'error description' stamp: 'FL 8/14/2022 19:01:25'!
+invalidThresholdDescription
+	^'threshold cannot be negative'! !
+
+!MagicLiteralsTestRule class methodsFor: 'error' stamp: 'FL 8/14/2022 19:00:50'!
 errorInvalidThreshold
 
 	^ self error: self invalidThresholdDescription! !
