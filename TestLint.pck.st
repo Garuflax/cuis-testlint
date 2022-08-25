@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 14 August 2022 at 7:22:33 pm'!
+'From Cuis 6.0 [latest update: #5093] on 24 August 2022 at 10:14:16 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 17!
+!provides: 'TestLint' 1 18!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -155,6 +155,16 @@ Object subclass: #TestLintBrowserMenus
 	category: 'TestLint-GUI'!
 !classDefinition: 'TestLintBrowserMenus class' category: 'TestLint-GUI'!
 TestLintBrowserMenus class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestLintResultModel category: 'TestLint-GUI'!
+Object subclass: #TestLintResultModel
+	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-GUI'!
+!classDefinition: 'TestLintResultModel class' category: 'TestLint-GUI'!
+TestLintResultModel class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLintRunner category: 'TestLint-GUI'!
@@ -379,7 +389,7 @@ TestLint class
 
 !classDefinition: #TestLintFailure category: 'TestLint-Model'!
 Object subclass: #TestLintFailure
-	instanceVariableNames: ''
+	instanceVariableNames: 'node rule'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -389,7 +399,7 @@ TestLintFailure class
 
 !classDefinition: #MissingTestSmell category: 'TestLint-Model'!
 TestLintFailure subclass: #MissingTestSmell
-	instanceVariableNames: 'node rule description'
+	instanceVariableNames: 'description'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -399,7 +409,7 @@ MissingTestSmell class
 
 !classDefinition: #TestSmell category: 'TestLint-Model'!
 TestLintFailure subclass: #TestSmell
-	instanceVariableNames: 'node rule'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -413,6 +423,9 @@ I am a specialized window that shows the results of the TestLint run.!
 
 !TestLintBrowserMenus commentStamp: '<historical>' prior: 0!
 I exist with the sole purpose of defining the menu items to run testlint.!
+
+!TestLintResultModel commentStamp: '<historical>' prior: 0!
+I am a container of the result of TestLintRunner in a format that can be used by TestLintResultWindow.!
 
 !TestLintRunner commentStamp: '<historical>' prior: 0!
 I exist with the sole purpose of running TestLint over a Node.
@@ -452,19 +465,45 @@ linesOfCode
 name
 	^compiledMethod selector asString! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 4/14/2022 18:58:00'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 21:47:42'!
 buildMorphicWindow
-	! !
+	
+	self layoutMorph 
+		addMorph: self nodesList proportionalHeight: 0.70;
+		addAdjusterAndMorph: self resultsList proportionalHeight: 0.15;
+		addAdjusterAndMorph: self detail proportionalHeight: 0.15.! !
 
-!TestLintResultWindow class methodsFor: 'instance creation' stamp: 'FL 5/25/2022 19:33:47'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 21:54:11'!
+detail
+
+	| detail |
+	detail := TextModelMorph textProvider: model textGetter: #selectedTestLintFailureDetail.
+	model when: #selectedTestLintFailureChanged send: #refetch to: detail model.
+	detail disableEditing.
+	
+	^detail! !
+
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 19:59:34'!
+nodesList
+
+	| nodesList |
+	
+	nodesList := PluggableListMorph model: model listGetter: #nodesNamesList indexGetter: #nodesNamesListIndex indexSetter: #nodesNamesListIndex:.
+	
+	^nodesList.! !
+
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 22:06:26'!
+resultsList
+
+	| resultsList |
+	resultsList := PluggableListMorph model: model listGetter: #selectedNodeTestLintFailures indexGetter: #nodesTestLintFailuresDiccionaryIndex indexSetter: #nodesTestLintFailuresDiccionaryIndex:.
+	"model when: #selectedNodeChanged send: #refetch to: resultsList model. TODO"
+	^resultsList.! !
+
+!TestLintResultWindow class methodsFor: 'instance creation' stamp: 'FL 8/20/2022 19:50:38'!
 displayTestLintResultFrom: results
 	
-	| resultsList testLintResultWindow |
-	resultsList := LayoutMorph newColumn.
-	results do: [:result | resultsList addMorph: (TextParagraphMorph contents: result message)].
-	testLintResultWindow := self open: nil label: 'TestLint Result'.
-	testLintResultWindow layoutMorph addMorph: resultsList.
-	^testLintResultWindow! !
+	self open: results label: 'TestLint Result'.! !
 
 !AnonymousTestRuleTest methodsFor: 'tests' stamp: 'FL 6/4/2022 17:33:57'!
 test01AnonymousTestRuleNotSatisfied
@@ -1326,13 +1365,91 @@ messageListMenuOptions
 		} asDictionary.
 	   }`.! !
 
-!TestLintRunner methodsFor: 'initialization' stamp: 'FL 6/19/2022 17:01:24'!
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:18:49'!
+addTestLintFailure: aTestLintFailure toNode: aNodeName
+
+	| nodeTestLintFailures |
+	nodeTestLintFailures := nodesTestLintFailuresDiccionary at: aNodeName ifAbsent: [OrderedCollection new].
+	nodeTestLintFailures add: aTestLintFailure.
+	nodesTestLintFailuresDiccionary at: aNodeName put: nodeTestLintFailures.! !
+
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:20:29'!
+buildNodesNamesListFrom: aTestLintFailureCollection 
+	
+	nodesNamesList := aTestLintFailureCollection collect: [:aTestLintFailure | aTestLintFailure node name].! !
+
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:19:24'!
+buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection 
+	
+	nodesTestLintFailuresDiccionary := Dictionary new.
+	aTestLintFailureCollection do: [:aTestLintFailure | self addTestLintFailure: aTestLintFailure toNode: aTestLintFailure node name].! !
+
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:20:07'!
+initializeFor: aTestLintFailureCollection 
+	
+	self buildNodesNamesListFrom: aTestLintFailureCollection.
+	nodesNamesListIndex := 0.
+	self buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection.
+	nodesTestLintFailuresDiccionaryIndex := 0.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 19:56:44'!
+nodesNamesListIndex
+
+	^nodesNamesListIndex ! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:43:29'!
+nodesNamesListIndex: anInteger
+
+	nodesNamesListIndex := anInteger.
+	self changed: #selectedNodeTestLintFailures.
+	self triggerEvent: #selectedNodeChanged.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:21:46'!
+nodesTestLintFailuresDiccionaryIndex
+
+	^nodesTestLintFailuresDiccionaryIndex ! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:49:35'!
+nodesTestLintFailuresDiccionaryIndex: anInteger
+
+	nodesTestLintFailuresDiccionaryIndex := anInteger.
+	self triggerEvent: #selectedTestLintFailureChanged.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:25:33'!
+selectedNodeName
+
+	^nodesNamesList at: nodesNamesListIndex.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:57:32'!
+selectedNodeTestLintFailures
+
+	nodesNamesListIndex = 0 ifTrue: [^OrderedCollection new].
+	^(nodesTestLintFailuresDiccionary at: self selectedNodeName) collect: [:aTestLintFailure | aTestLintFailure rule class].! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:52:38'!
+selectedTestLintFailureDetail
+
+	(nodesNamesListIndex = 0 or: [nodesTestLintFailuresDiccionaryIndex = 0]) ifTrue: [^''].
+	^((nodesTestLintFailuresDiccionary at: self selectedNodeName) at: nodesTestLintFailuresDiccionaryIndex) message ! !
+
+!TestLintResultModel methodsFor: 'accessing' stamp: 'FL 8/24/2022 19:57:50'!
+nodesNamesList
+
+	^nodesNamesList ! !
+
+!TestLintResultModel class methodsFor: 'instance creation' stamp: 'FL 8/24/2022 19:38:11'!
+for: aTestLintFailureCollection 
+	
+	^self new initializeFor: aTestLintFailureCollection ! !
+
+!TestLintRunner methodsFor: 'initialization' stamp: 'FL 8/24/2022 19:36:42'!
 initializeRun: aNode 
 	
-	| testLintFailures expectedTestSmells |
+	| testLintFailures expectedTestSmells model |
 	expectedTestSmells := self getExpectedTestSmellsOf: aNode linkedClass.
 	testLintFailures := (TestLint withRules: (self class testRules) andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
-	TestLintResultWindow displayTestLintResultFrom: testLintFailures.! !
+	model := TestLintResultModel for: testLintFailures.
+	TestLintResultWindow displayTestLintResultFrom: model.! !
 
 !TestLintRunner methodsFor: 'accessing' stamp: 'FL 7/2/2022 12:31:57'!
 getExpectedTestSmellsOf: aClass 
@@ -2114,6 +2231,15 @@ message
 
 	^self subclassResponsibility ! !
 
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/21/2022 15:56:12'!
+node
+	^node! !
+
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/21/2022 15:56:24'!
+rule
+	
+	^rule! !
+
 !MissingTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 17:01:36'!
 initializeWithNode: aNode andRule: aRule because: aDescription  
 	
@@ -2140,15 +2266,6 @@ initializeWithNode: aNode andRule: aRule
 message
 
 	^node name, ' ', rule class violationMessage.! !
-
-!TestSmell methodsFor: 'accessing' stamp: 'FL 6/4/2022 18:14:46'!
-node
-	^node! !
-
-!TestSmell methodsFor: 'accessing' stamp: 'FL 6/4/2022 18:22:26'!
-rule
-	
-	^rule! !
 
 !TestSmell class methodsFor: 'instance creation' stamp: 'FL 6/4/2022 17:34:57'!
 withNode: aNode andRule: aRule   
