@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 24 August 2022 at 10:14:16 pm'!
+'From Cuis 6.0 [latest update: #5093] on 28 August 2022 at 7:47:42 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 18!
+!provides: 'TestLint' 1 19!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -1373,10 +1373,12 @@ addTestLintFailure: aTestLintFailure toNode: aNodeName
 	nodeTestLintFailures add: aTestLintFailure.
 	nodesTestLintFailuresDiccionary at: aNodeName put: nodeTestLintFailures.! !
 
-!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:20:29'!
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/28/2022 19:46:04'!
 buildNodesNamesListFrom: aTestLintFailureCollection 
 	
-	nodesNamesList := aTestLintFailureCollection collect: [:aTestLintFailure | aTestLintFailure node name].! !
+	nodesNamesList := aTestLintFailureCollection collect: [:aTestLintFailure | aTestLintFailure node name].
+	nodesNamesList := nodesNamesList asSet.
+	nodesNamesList := nodesNamesList asOrderedCollection.! !
 
 !TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:19:24'!
 buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection 
