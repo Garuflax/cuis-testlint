@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 28 August 2022 at 7:47:42 pm'!
+'From Cuis 6.0 [latest update: #5093] on 31 August 2022 at 9:52:03 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 19!
+!provides: 'TestLint' 1 20!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -119,7 +119,7 @@ TestClassNodeTest class
 
 !classDefinition: #TestLintTest category: 'TestLint-Tests'!
 TestCase subclass: #TestLintTest
-	instanceVariableNames: 'strictLongTestRule flexibleMaxInstanceVariablesRule'
+	instanceVariableNames: 'anonymousTestRule strictLongTestRule flexibleMaxInstanceVariablesRule'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
@@ -537,7 +537,7 @@ test03AnonymousTestRuleSatisfiedWithoutNumber
 	
 	self assert: 0 equals: result size.! !
 
-!AnonymousTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 18:56:09'!
+!AnonymousTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 19:54:39'!
 test04AnonymousTestRuleNotSatisfiedWithNumber
 
 	| anAnonymousTestRule aTestMethodNode result |
@@ -547,7 +547,7 @@ test04AnonymousTestRuleNotSatisfiedWithNumber
 	result := anAnonymousTestRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: 'test100 is an Anonymous Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: anAnonymousTestRule ) message equals: result first message.! !
 
 !AnonymousTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 4/26/2022 20:11:20'!
 compiledAnonymousTest
@@ -605,7 +605,7 @@ test01TestWithAssertIsNotAnAssertionlessTest
 	
 	self assert: 0 equals: result size.! !
 
-!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/2/2022 15:33:35'!
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 19:55:14'!
 test02TestWithoutAssertIsAnAssertionlessTest
 
 	| anAssetionlessTestRule result aTestMethodNode |
@@ -615,7 +615,7 @@ test02TestWithoutAssertIsAnAssertionlessTest
 	result := anAssetionlessTestRule runMethod: (aTestMethodNode).
 	
 	self assert: 1 equals: result size.
-	self assert: 'testWithoutAssert is an Assertionless Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: anAssetionlessTestRule) message equals: result first message.! !
 
 !AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 7/2/2022 15:47:55'!
 test03TestWithCustomAssertIsNotAnAssertionlessTest
@@ -744,7 +744,7 @@ test01TestWithoutConditionalIsNotAGuardedTest
 	
 	self assert: 0 equals: result size.! !
 
-!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:07:37'!
+!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 19:55:52'!
 test02TestWithIfTrueIsAGuardedTest
 
 	| aGuardedTestRule result aTestMethodNode |
@@ -754,9 +754,9 @@ test02TestWithIfTrueIsAGuardedTest
 	result := aGuardedTestRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: 'testWithIfTrue is a Guarded Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aGuardedTestRule) message equals: result first message.! !
 
-!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:08:07'!
+!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 19:56:04'!
 test03TestWithIfFalseIsAGuardedTest
 
 	| aGuardedTestRule result aTestMethodNode |
@@ -766,9 +766,9 @@ test03TestWithIfFalseIsAGuardedTest
 	result := aGuardedTestRule runMethod: (aTestMethodNode).
 	
 	self assert: 1 equals: result size.
-	self assert: 'testWithIfFalse is a Guarded Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aGuardedTestRule) message equals: result first message.! !
 
-!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:08:53'!
+!GuardedTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 19:56:14'!
 test04TestWithIfTrueIfFalseIsAGuardedTest
 
 	| aGuardedTestRule result aTestMethodNode |
@@ -778,7 +778,7 @@ test04TestWithIfTrueIfFalseIsAGuardedTest
 	result := aGuardedTestRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: 'testWithIfTrueIfFalse is a Guarded Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aGuardedTestRule) message equals: result first message.! !
 
 !GuardedTestRuleTest methodsFor: 'test objects' stamp: 'FL 5/8/2022 12:15:55'!
 testWithIfFalse
@@ -819,22 +819,23 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithIfFalse for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithIfTrue for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithIfTrueIfFalse for: GuardedTestRule because: 'Testing purpose')! !
 
-!LongTestRuleTest methodsFor: 'tests' stamp: 'FL 5/15/2022 19:11:47'!
+!LongTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:01:48'!
 test01LongTestRuleNotSatisfied
 
-	| aLongTestRule result |
+	| aLongTestRule aTestMethodNode result |
 	aLongTestRule := LongTestRule withThreshold: 0.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test01LongTestRuleNotSatisfied).
 	
-	result := aLongTestRule runMethod: (TestMethodNode for: (self class compiledMethodAt: #test01LongTestRuleNotSatisfied)).
+	result := aLongTestRule runMethod: aTestMethodNode .
 	
 	self assert: 1 equals: result size.
-	self assert: 'test01LongTestRuleNotSatisfied is a Long Test' equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aLongTestRule) message equals: result first message.! !
 
-!LongTestRuleTest methodsFor: 'tests' stamp: 'FL 5/10/2022 22:33:14'!
+!LongTestRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:01:58'!
 test02LongTestRuleSatisfied
 
 	| aLongTestRule result |
-	aLongTestRule := LongTestRule withThreshold: 9.
+	aLongTestRule := LongTestRule withThreshold: 10.
 	
 	result := aLongTestRule runMethod: (TestMethodNode for: (self class compiledMethodAt: #test01LongTestRuleNotSatisfied)).
 	
@@ -967,16 +968,17 @@ test01CategoryWithoutMethodsDoesNotHaveMixedSelectors
 	
 	self assert: 0 equals: results size.! !
 
-!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:25:01'!
+!MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:14:20'!
 test02CategoryWithMixedSelectors
 
-	| aMixedSelectorsRule results |
+	| aMixedSelectorsRule aMethodCategoryNode results |
 	aMixedSelectorsRule := MixedSelectorsRule new.
+	aMethodCategoryNode := MethodCategoryNode for: 'test objects mixed' of: MixedSelectorsRuleTest categorizedWith: self class organization.
 	
-	results := aMixedSelectorsRule runMethodCategory: (MethodCategoryNode for: 'test objects mixed' of: MixedSelectorsRuleTest categorizedWith: self class organization).
+	results := aMixedSelectorsRule runMethodCategory: aMethodCategoryNode.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test objects mixed is a Category with Mixed Selectors' equals: results first message! !
+	self assert: (TestSmell withNode: aMethodCategoryNode andRule: aMixedSelectorsRule) message equals: results first message! !
 
 !MixedSelectorsRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:25:20'!
 test03CategoryWithoutMixedSelectors
@@ -1061,16 +1063,18 @@ test01RunWithoutRulesFinishesFine
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:03:37'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:07:49'!
 test02RunWithOneRuleNotSatisfiedForMethodNodeReturnsDescription
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	| aTestLint aTestMethodNode aRule results |
+	aRule := AnonymousTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
+	aTestLint := TestLint withRules: (Array with: aRule) forNode: aTestMethodNode.
 	
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test is an Anonymous Test' equals: results first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: aRule) message equals: results first message.! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:04:03'!
 test03RunWithRuleSatisfiedDoesNotReturnAnyDescription
@@ -1082,43 +1086,48 @@ test03RunWithRuleSatisfiedDoesNotReturnAnyDescription
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:15:25'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:11:02'!
 test04RunReturnsDescriptionForAllRulesThatWereNotSatisfied
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: AnonymousTestRule new) forNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	| anAnonymousTestRule aTestMethodNode aTestLint results |
+	anAnonymousTestRule := AnonymousTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
+	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: anAnonymousTestRule) forNode: aTestMethodNode.
 	
 	results := aTestLint run.
 	
 	self assert: 2 equals: results size.
-	self assert: 'test is a Long Test' equals: results first message.
-	self assert: 'test is an Anonymous Test' equals: results second message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: strictLongTestRule) message equals: results first message.
+	self assert: (TestSmell withNode: aTestMethodNode andRule: anAnonymousTestRule) message equals: results second message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:17:01'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:24:57'!
 test05RunWithMethodRuleOverMethodCategoryNodeAppliesItToEveryTestMethodInside
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: AnonymousTestRule new) forNode: (MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization).
+	| aMethodCategoryNode anAnonymousTestRule aTestLint results |
+	aMethodCategoryNode := MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization.
+	anAnonymousTestRule := AnonymousTestRule new.
+	aTestLint := TestLint withRules: (Array with: strictLongTestRule with: anAnonymousTestRule) forNode: aMethodCategoryNode .
 	
 	results := aTestLint run.
 	
 	self assert: 3 equals: results size.
-	self assert: 'test is a Long Test' equals: results first message.
-	self assert: 'test100notAnonymous is a Long Test' equals: results second message.
-	self assert: 'test is an Anonymous Test' equals: results third message.! !
+	self assert: (TestSmell withNode: (TestMethodNode for: self compiledTestWithoutAssert) andRule: strictLongTestRule) message equals: results first message.
+	self assert: (TestSmell withNode: (TestMethodNode for: self compiledTestWithoutAssert2) andRule: strictLongTestRule) message equals: results second message.
+	self assert: (TestSmell withNode: (TestMethodNode for: self compiledTestWithoutAssert) andRule: anAnonymousTestRule) message equals: results third message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:05:34'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:28:20'!
 test06RunWithMethodRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	| anAnonymousTestRule aTestLint results |
+	anAnonymousTestRule := AnonymousTestRule new.
+	aTestLint := TestLint withRules: (Array with: anAnonymousTestRule) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
 	
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test is an Anonymous Test' equals: results first message.! !
+	self assert: (TestSmell withNode: (TestMethodNode for: self compiledTestWithoutAssert) andRule: anAnonymousTestRule) message equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:08:01'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:16:51'!
 test07RunWithExpectedFailureNotAppearingNotifiesIt
 
 	| aTestLint results |
@@ -1127,7 +1136,7 @@ test07RunWithExpectedFailureNotAppearingNotifiesIt
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test100notAnonymous was expected to violate AnonymousTestRule because Testing purpose' equals: results first message.! !
+	self assert: AnonymousTestRule title, ' (EXPECTED)' equals: results first title.! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:08:56'!
 test08RunWithExpectedFailureButRuleIsNotRunIsOK
@@ -1149,16 +1158,17 @@ test09RunWithExpectedFailureInTestAppearingDoesNotNotifyIt
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:10:58'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:34:25'!
 test10RunWithNotExpectedFailureAppearingNotifiesIt
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: AnonymousTestRule new) andExpectedTestSmells: Array new forNode: (TestMethodNode for: self compiledTestWithoutAssert).
+	| aTestMethodNode aTestLint results |
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutAssert.
+	aTestLint := TestLint withRules: (Array with: anonymousTestRule) andExpectedTestSmells: Array new forNode: aTestMethodNode.
 	
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test is an Anonymous Test' equals: results first message..! !
+	self assert: (TestSmell withNode: aTestMethodNode andRule: anonymousTestRule) message equals: results first message.! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:12:59'!
 test11RunWithExpectedFailureInCategoryAppearingDoesNotNotifyIt
@@ -1173,18 +1183,21 @@ test11RunWithExpectedFailureInCategoryAppearingDoesNotNotifyIt
 	
 	self assert: results isEmpty.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:14:50'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 21:35:47'!
 test12RunWithMethodCategoryRuleOverTestClassNodeAppliesItToEveryMethodCategoryInside
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: MixedSelectorsRule new) forNode: (TestClassNode for: (Smalltalk classNamed: 'TestLintTest')).
+	| aMixedSelectorsRule aTestClassNode violatingMethodCategoryNode aTestLint results |
+	aMixedSelectorsRule := MixedSelectorsRule new.
+	aTestClassNode := TestClassNode for: (Smalltalk classNamed: 'TestLintTest').
+	violatingMethodCategoryNode := MethodCategoryNode for: 'test objects' of: TestLintTest categorizedWith: self class organization.
+	aTestLint := TestLint withRules: (Array with: aMixedSelectorsRule) forNode: aTestClassNode.
 	
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
+	self assert: (TestSmell withNode: violatingMethodCategoryNode andRule: aMixedSelectorsRule) message equals: results first message.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 8/14/2022 19:20:31'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 20:36:02'!
 test13RunWithExpectedFailureInClassNotAppearingNotifiesIt
 
 	| aTestLint results |
@@ -1193,18 +1206,20 @@ test13RunWithExpectedFailureInClassNotAppearingNotifiesIt
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'TestLintTest was expected to violate MaxInstanceVariablesRule because Testing purpose' equals: results first message.! !
+	self assert: MaxInstanceVariablesRule title, ' (EXPECTED)'equals: results first title.! !
 
-!TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:16:12'!
+!TestLintTest methodsFor: 'tests' stamp: 'FL 8/31/2022 21:42:08'!
 test14RunWithMethodCategoryRuleOverMethodCategoryNodeIsOK
 
-	| aTestLint results |
-	aTestLint := TestLint withRules: (Array with: MixedSelectorsRule new) forNode: (MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization).
+	| aMixedSelectorsRule violatingMethodCategoryNode aTestLint results |
+	aMixedSelectorsRule := MixedSelectorsRule new.
+	violatingMethodCategoryNode := MethodCategoryNode for: #'test objects' of: self class categorizedWith: self class organization.
+	aTestLint := TestLint withRules: (Array with: aMixedSelectorsRule) forNode: violatingMethodCategoryNode.
 	
 	results := aTestLint run.
 	
 	self assert: 1 equals: results size.
-	self assert: 'test objects is a Category with Mixed Selectors' equals: results first message.! !
+	self assert: (TestSmell withNode: violatingMethodCategoryNode andRule: aMixedSelectorsRule) message equals: results first message.! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 17:16:41'!
 test15RunWithClassRuleOverClassNodeIsOK
@@ -1264,11 +1279,12 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #test for: AnonymousTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #'test objects' for: MixedSelectorsRule because: 'Testing purpose')! !
 
-!TestLintTest methodsFor: 'initialization' stamp: 'FL 8/14/2022 19:20:15'!
+!TestLintTest methodsFor: 'initialization' stamp: 'FL 8/31/2022 20:36:19'!
 setUp
 	
+	anonymousTestRule := AnonymousTestRule new.
 	strictLongTestRule := LongTestRule withThreshold: 0.
-	flexibleMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 2.! !
+	flexibleMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 3.! !
 
 !TestMethodNodeTest methodsFor: 'test objects' stamp: 'FL 5/29/2022 16:28:35'!
 compiledMethod
@@ -1422,11 +1438,11 @@ selectedNodeName
 
 	^nodesNamesList at: nodesNamesListIndex.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:57:32'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/31/2022 19:50:07'!
 selectedNodeTestLintFailures
 
 	nodesNamesListIndex = 0 ifTrue: [^OrderedCollection new].
-	^(nodesTestLintFailuresDiccionary at: self selectedNodeName) collect: [:aTestLintFailure | aTestLintFailure rule class].! !
+	^(nodesTestLintFailuresDiccionary at: self selectedNodeName) collect: [:aTestLintFailure | aTestLintFailure title].! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:52:38'!
 selectedTestLintFailureDetail
@@ -1822,8 +1838,13 @@ noTestSmell
 testSmell: aNode 
 	^OrderedCollection with: (TestSmell withNode: aNode andRule: self ).! !
 
-!Rule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:38:16'!
-violationMessage
+!Rule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	self subclassResponsibility ! !
+
+!Rule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:07:30'!
+title
+
 	self subclassResponsibility ! !
 
 !ClassRule methodsFor: 'evaluating' stamp: 'FL 6/8/2022 19:14:51'!
@@ -1846,9 +1867,13 @@ withThreshold: aThreshold
 	
 	^self new initializeWithThreshold: aThreshold ! !
 
-!MaxInstanceVariablesRule class methodsFor: 'message' stamp: 'FL 6/8/2022 19:42:18'!
-violationMessage
-	^'has too many instance variables'! !
+!MaxInstanceVariablesRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'The class has too many instance variables.'! !
+
+!MaxInstanceVariablesRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:09:09'!
+title
+	^'Too many instance variables'! !
 
 !MaxInstanceVariablesRule class methodsFor: 'error description' stamp: 'FL 6/8/2022 19:45:05'!
 invalidThresholdDescription
@@ -1868,8 +1893,8 @@ runMethodCategory: aMethodCategoryNode
 
 	^self runForReal: aMethodCategoryNode.! !
 
-!MethodCategoryRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:38:50'!
-violationMessage
+!MethodCategoryRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
 	self subclassResponsibility ! !
 
 !MixedSelectorsRule methodsFor: 'testing' stamp: 'FL 5/28/2022 12:02:00'!
@@ -1898,17 +1923,24 @@ isViolatedBy: aMethodCategoryNode
 
 	^self hasMixedSelectors: aMethodCategoryNode! !
 
-!MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 5/25/2022 18:45:12'!
-violationMessage
-	^'is a Category with Mixed Selectors'! !
+!MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It contains test-methods and non test-methods.
+	
+The problem of mixing up all the methods of a test-class is that it is harder to allocate and differentiate accessors, fixtures, utilities and test-methods. By putting each type of method into a different method category, especially
+strictly separating test-methods from other methods we get a better structure of the test-class. A better and cleaner structure helps in understanding the test-suite, the fixtures and all the test-methods.'! !
+
+!MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:10:19'!
+title
+	^'Mixed Selectors'! !
 
 !MethodRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 16:08:31'!
 runMethod: aMethodNode 
 	
 	^self runForReal: aMethodNode ! !
 
-!MethodRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:38:57'!
-violationMessage
+!MethodRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
 	self subclassResponsibility ! !
 
 !AnonymousTestRule methodsFor: 'testing' stamp: 'FL 5/1/2022 16:26:26'!
@@ -1921,9 +1953,15 @@ isViolatedBy: aMethodNode
 	name := aMethodNode name.
 	^self isAnonymous: name.! !
 
-!AnonymousTestRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:36:12'!
-violationMessage
-	^'is an Anonymous Test'! !
+!AnonymousTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:51:26'!
+description
+	^'It has a meaningless name. It does not express the purpose of the test in the current context.
+
+Tests can be regarded as documentation, and the name is an important part of that as it should abstract what the test is all about.'! !
+
+!AnonymousTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:11:04'!
+title
+	^'Anonymous'! !
 
 !AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/3/2022 15:59:26'!
 getAllSelectorsCalledInClassHierarchy: aMethodNode 
@@ -1968,9 +2006,14 @@ isAnAssertion: aMethodNode forClass: aClass
 	
 	^anAssertionChecker check.! !
 
-!AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 7/2/2022 15:42:59'!
-violationMessage
-	^'is an Assertionless Test'! !
+!AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It does not contain at least one valid assertion.  It only executes plain source-code, but never assert any data, state
+or functionality. Besides, it can either succeed or throw an error but can never throw an assertion failure, unless thrown explicitly, which should not be done.'! !
+
+!AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:11:32'!
+title
+	^'Assertionless'! !
 
 !GuardedTestRule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
 isViolatedBy: aMethodNode
@@ -1996,9 +2039,15 @@ conditionalSelectors
 
 	^Array with: #ifTrue: with: #ifFalse: with: #ifTrue:ifFalse:! !
 
-!GuardedTestRule class methodsFor: 'message' stamp: 'FL 5/15/2022 18:39:39'!
-violationMessage
-	^'is a Guarded Test'! !
+!GuardedTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It includes boolean branching logics like ifTrue: or ifFalse:.
+
+The problem of using such conditionals is that they break the linearity of a test by controlling the execution flow, making the test less predictable and harder to understand. The documenting nature of a test might vanish. Furthermore it could be that certain assertions are not executed. In the worst case an actual failing test returns a success letting the developer believe the test is green. Moreover, guarding clauses might reveal an encapsulation break of the application code by exposing the internal model logic to the tests. This also increases the coupling between the tests and the sources and leads to fragile and trust-unworthy tests.'! !
+
+!GuardedTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:11:46'!
+title
+	^'Guarded'! !
 
 !LongTestRule methodsFor: 'initialization' stamp: 'FL 4/20/2022 22:33:29'!
 initializeWithThreshold: aThreshold 
@@ -2022,9 +2071,15 @@ withThreshold: aThreshold
 	
 	^self new initializeWithThreshold: aThreshold ! !
 
-!LongTestRule class methodsFor: 'message' stamp: 'FL 5/15/2022 19:12:47'!
-violationMessage
-	^'is a Long Test'! !
+!LongTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It consists of lot of code and statements.
+	
+Such tests are mostly complex and badly document the purpose of the test and the application code.'! !
+
+!LongTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:12:23'!
+title
+	^'Long'! !
 
 !LongTestRule class methodsFor: 'error description' stamp: 'FL 5/29/2022 15:17:34'!
 invalidThresholdDescription
@@ -2054,9 +2109,17 @@ initializeWithThreshold: aThreshold
 	
 	threshold := aThreshold.! !
 
-!MagicLiteralsTestRule class methodsFor: 'message' stamp: 'FL 8/14/2022 18:44:38'!
-violationMessage
-	^'has too many literals'! !
+!MagicLiteralsTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It has an excessive use of literals. This can cause severe problems:
+
+- Too many literals are distracting and obfuscate the functionality and purpose of a test. This makes a test hard to read and understand.
+
+- The same or similar test data is often repeated within a test or test-suite. This is often a consequence of simply extending or adding tests without actually designing them. The result is a test-suite that is extremely hard to maintain and refactor.'! !
+
+!MagicLiteralsTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:12:39'!
+title
+	^'Magic Literals'! !
 
 !MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 8/14/2022 18:50:14'!
 withThreshold: aThreshold 
@@ -2114,9 +2177,23 @@ isViolatedBy: aMethodNode
 							
 	^false.! !
 
-!ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 7/11/2022 19:51:03'!
-violationMessage
-	^'does not have a Proper Organization'! !
+!ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
+	^'It does not have a Proper Organization.
+
+Tests should have the following structure:
+
+- Arrange: This is where you initialize objects and set the value of the data to be passed to the function under test.
+
+- Act: The act section invokes the function under test.
+
+- Assert: This is where you verify that the action of the function under test behaves as expected.
+
+So asserts should be together at the end of the test.'! !
+
+!ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:32'!
+title
+	^'Improper Organization'! !
 
 !WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
 hasEqualMessageAsArgument: aMethodNode
@@ -2140,10 +2217,14 @@ isViolatedBy: aMethodNode
 							
 	^false.! !
 
-!WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 7/17/2022 18:03:49'!
-violationMessage
+!WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+description
 	
-	^'should use the message #assert:equals:'! !
+	^'(assert: a = b) should be replaced with the message #assert:equals:'! !
+
+!WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:52'!
+title
+	^'Wrong Assert Usage'! !
 
 !TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
 initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
@@ -2242,6 +2323,11 @@ rule
 	
 	^rule! !
 
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:05:00'!
+title
+
+	self subclassResponsibility ! !
+
 !MissingTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 17:01:36'!
 initializeWithNode: aNode andRule: aRule because: aDescription  
 	
@@ -2249,9 +2335,13 @@ initializeWithNode: aNode andRule: aRule because: aDescription
 	rule := aRule.
 	description := aDescription.! !
 
-!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 6/4/2022 17:05:43'!
+!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:52:24'!
 message
-	^node name, ' was expected to violate ', rule name, ' because ', description.! !
+	^description.! !
+
+!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:46:36'!
+title
+	^rule title, ' (EXPECTED)'.! !
 
 !MissingTestSmell class methodsFor: 'instance creation' stamp: 'FL 6/4/2022 17:35:30'!
 withNode: aNode andRule: aRule because: aDescription  
@@ -2264,10 +2354,14 @@ initializeWithNode: aNode andRule: aRule
 	node := aNode.
 	rule := aRule.! !
 
-!TestSmell methodsFor: 'accessing' stamp: 'FL 6/4/2022 18:14:39'!
+!TestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 21:47:00'!
 message
 
-	^node name, ' ', rule class violationMessage.! !
+	^rule class description.! !
+
+!TestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:47:33'!
+title
+	^rule class title! !
 
 !TestSmell class methodsFor: 'instance creation' stamp: 'FL 6/4/2022 17:34:57'!
 withNode: aNode andRule: aRule   
