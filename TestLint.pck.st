@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 1 September 2022 at 8:09:49 pm'!
+'From Cuis 6.0 [latest update: #5093] on 14 September 2022 at 10:00:11 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 21!
+!provides: 'TestLint' 1 22!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -225,6 +225,16 @@ Node subclass: #MethodCategoryNode
 	category: 'TestLint-Model'!
 !classDefinition: 'MethodCategoryNode class' category: 'TestLint-Model'!
 MethodCategoryNode class
+	instanceVariableNames: ''!
+
+!classDefinition: #NullNode category: 'TestLint-Model'!
+Node subclass: #NullNode
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'NullNode class' category: 'TestLint-Model'!
+NullNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestClassNode category: 'TestLint-Model'!
@@ -465,13 +475,33 @@ linesOfCode
 name
 	^compiledMethod selector asString! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 21:47:42'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/8/2022 21:41:44'!
+browseButton
+
+	| browseButton |
+	
+	browseButton := PluggableButtonMorph model: model action: #browseNode label: 'browse'.
+	browseButton color: self buttonColor.
+	
+	^ browseButton! !
+
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/14/2022 20:02:33'!
 buildMorphicWindow
 	
 	self layoutMorph 
-		addMorph: self nodesList proportionalHeight: 0.70;
-		addAdjusterAndMorph: self resultsList proportionalHeight: 0.15;
-		addAdjusterAndMorph: self detail proportionalHeight: 0.15.! !
+		addMorph: self nodesList proportionalHeight: 0.20;
+		addAdjusterAndMorph: self resultsList proportionalHeight: 0.20;
+		addAdjusterAndMorph: self detail proportionalHeight: 0.60;
+		addAdjusterAndMorph: self buttonPanel fixedHeight: self defaultButtonPaneHeight.! !
+
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/7/2022 21:21:31'!
+buttonPanel
+
+	| row |
+	row _ LayoutMorph newRow.
+	row doAdoptWidgetsColor.
+	row addMorphs: (Array with: self browseButton with: self expectedTestSmellsButton).
+	^ row! !
 
 !TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 21:54:11'!
 detail
@@ -483,6 +513,16 @@ detail
 	
 	^detail! !
 
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/8/2022 21:41:35'!
+expectedTestSmellsButton
+
+	| browseButton |
+	
+	browseButton := PluggableButtonMorph model: model stateGetter: #hasExpectedTestSmells action: #browseExpectedTestSmells label: 'expected test smells'.
+	browseButton color: self buttonColor.
+	
+	^ browseButton! !
+
 !TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 19:59:34'!
 nodesList
 
@@ -492,11 +532,11 @@ nodesList
 	
 	^nodesList.! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 22:06:26'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/14/2022 19:52:36'!
 resultsList
 
 	| resultsList |
-	resultsList := PluggableListMorph model: model listGetter: #selectedNodeTestLintFailures indexGetter: #nodesTestLintFailuresDiccionaryIndex indexSetter: #nodesTestLintFailuresDiccionaryIndex:.
+	resultsList := PluggableListMorph model: model listGetter: #selectedNodeTestLintFailuresTitles indexGetter: #nodesTestLintFailuresDiccionaryIndex indexSetter: #nodesTestLintFailuresDiccionaryIndex:.
 	"model when: #selectedNodeChanged send: #refetch to: resultsList model. TODO"
 	^resultsList.! !
 
@@ -1410,16 +1450,45 @@ initializeFor: aTestLintFailureCollection
 	self buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection.
 	nodesTestLintFailuresDiccionaryIndex := 0.! !
 
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/8/2022 21:41:22'!
+browseExpectedTestSmells
+
+	! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 21:59:33'!
+browseMethodCategoryNode: aMethodCategoryNode 
+	
+	BrowserWindow fullOnClass: aMethodCategoryNode linkedClass.
+	"TODO set category to window. BrowserWindow messages do not return the created instance so I cannot modify the state of a created windows easily."! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:38:33'!
+browseNode
+	
+	^self selectedNode browse: self.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 20:12:26'!
+browseTestClassNode: aTestClassNode 
+	BrowserWindow fullOnClass: aTestClassNode linkedClass ! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:59:48'!
+browseTestMethodNode: aTestMethodNode 
+	BrowserWindow fullOnClass: aTestMethodNode linkedClass selector: aTestMethodNode compiledMethod selector! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/8/2022 21:40:05'!
+hasExpectedTestSmells
+
+	^false "TODO"! !
+
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 19:56:44'!
 nodesNamesListIndex
 
 	^nodesNamesListIndex ! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:43:29'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:52:36'!
 nodesNamesListIndex: anInteger
 
 	nodesNamesListIndex := anInteger.
-	self changed: #selectedNodeTestLintFailures.
+	self changed: #selectedNodeTestLintFailuresTitles.
 	self triggerEvent: #selectedNodeChanged.! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:21:46'!
@@ -1433,16 +1502,26 @@ nodesTestLintFailuresDiccionaryIndex: anInteger
 	nodesTestLintFailuresDiccionaryIndex := anInteger.
 	self triggerEvent: #selectedTestLintFailureChanged.! !
 
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:55'!
+selectedNode
+
+	^self selectedNodeTestLintFailures ifEmpty: [NullNode new] ifNotEmpty: [:c | c anyOne node]! !
+
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:25:33'!
 selectedNodeName
 
 	^nodesNamesList at: nodesNamesListIndex.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/31/2022 19:50:07'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:31'!
 selectedNodeTestLintFailures
 
 	nodesNamesListIndex = 0 ifTrue: [^OrderedCollection new].
-	^(nodesTestLintFailuresDiccionary at: self selectedNodeName) collect: [:aTestLintFailure | aTestLintFailure title].! !
+	^nodesTestLintFailuresDiccionary at: self selectedNodeName.! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:47'!
+selectedNodeTestLintFailuresTitles
+
+	^self selectedNodeTestLintFailures collect: [:aTestLintFailure | aTestLintFailure title].! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:52:38'!
 selectedTestLintFailureDetail
@@ -1641,6 +1720,11 @@ in: aSymbol for: aRuleClass because: aDescription
 applyRule: aRule 
 	^self subclassResponsibility.! !
 
+!Node methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:23:30'!
+browse: model
+
+	self subclassResponsibility ! !
+
 !Node methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
 linkedClass
 
@@ -1656,6 +1740,11 @@ initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer
 	categoryName := aCategoryName.
 	linkedClass := aClass.
 	classOrganizer := aClassOrganizer.! !
+
+!MethodCategoryNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:25:16'!
+browse: model
+
+	^model browseMethodCategoryNode: self! !
 
 !MethodCategoryNode methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:30:47'!
 applyRule: aRule 
@@ -1695,6 +1784,11 @@ for: aCategoryName of: aClass categorizedWith: aClassOrganizer
 	
 	^self new initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer ! !
 
+!NullNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:37:24'!
+browse: model
+
+	! !
+
 !TestClassNode methodsFor: 'initialization' stamp: 'FL 6/5/2022 14:53:41'!
 initializeFor: aClass 
 
@@ -1720,6 +1814,11 @@ contains: aNode
 = other
 
 	^self class = other class and: [linkedClass = other linkedClass].! !
+
+!TestClassNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:25:38'!
+browse: model
+
+	^model browseTestClassNode: self! !
 
 !TestClassNode class methodsFor: 'instance creation' stamp: 'FL 5/29/2022 16:41:59'!
 for: aClass 
@@ -1773,6 +1872,11 @@ methodNode
 !TestMethodNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:07:48'!
 contains: aNode 
 	^self = aNode! !
+
+!TestMethodNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:25:57'!
+browse: model
+
+	^model browseTestMethodNode: self! !
 
 !TestMethodNode class methodsFor: 'assertion' stamp: 'FL 5/29/2022 16:34:53'!
 isTestMethod: aCompiledMethod
