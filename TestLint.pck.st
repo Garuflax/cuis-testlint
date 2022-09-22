@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 14 September 2022 at 10:00:11 pm'!
+'From Cuis 6.0 [latest update: #5093] on 21 September 2022 at 11:35:54 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 22!
+!provides: 'TestLint' 1 23!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -137,6 +137,16 @@ TestCase subclass: #TestMethodNodeTest
 TestMethodNodeTest class
 	instanceVariableNames: ''!
 
+!classDefinition: #UnclassifiedMethodCategoryRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #UnclassifiedMethodCategoryRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'UnclassifiedMethodCategoryRuleTest class' category: 'TestLint-Tests'!
+UnclassifiedMethodCategoryRuleTest class
+	instanceVariableNames: ''!
+
 !classDefinition: #WrongAssertUsageTestRuleTest category: 'TestLint-Tests'!
 TestCase subclass: #WrongAssertUsageTestRuleTest
 	instanceVariableNames: ''
@@ -159,7 +169,7 @@ TestLintBrowserMenus class
 
 !classDefinition: #TestLintResultModel category: 'TestLint-GUI'!
 Object subclass: #TestLintResultModel
-	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex'
+	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
@@ -377,6 +387,16 @@ MethodRule subclass: #ProperOrganizationTestRule
 ProperOrganizationTestRule class
 	instanceVariableNames: ''!
 
+!classDefinition: #UnclassifiedMethodCategoryRule category: 'TestLint-Model'!
+MethodRule subclass: #UnclassifiedMethodCategoryRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'UnclassifiedMethodCategoryRule class' category: 'TestLint-Model'!
+UnclassifiedMethodCategoryRule class
+	instanceVariableNames: ''!
+
 !classDefinition: #WrongAssertUsageTestRule category: 'TestLint-Model'!
 MethodRule subclass: #WrongAssertUsageTestRule
 	instanceVariableNames: ''
@@ -513,12 +533,13 @@ detail
 	
 	^detail! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/8/2022 21:41:35'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/19/2022 23:03:16'!
 expectedTestSmellsButton
 
 	| browseButton |
 	
-	browseButton := PluggableButtonMorph model: model stateGetter: #hasExpectedTestSmells action: #browseExpectedTestSmells label: 'expected test smells'.
+	browseButton := PluggableButtonMorph model: model action: #browseExpectedTestSmells label: 'expected test smells'.
+	browseButton enableSelector: #hasExpectedTestSmells.
 	browseButton color: self buttonColor.
 	
 	^ browseButton! !
@@ -1341,6 +1362,47 @@ test01CannotCreateTestMethodNodeWithoutATestMethod
 
 	self should: [TestMethodNode for: self compiledMethod] raise: Error withMessageText: TestMethodNode notATestMethodErrorDescription.! !
 
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 9/21/2022 23:08:38'!
+test01UnclassifiedMethodCategoryRuleNotSatisfied
+
+	| aUnclassifiedMethodCategoryRule aTestMethodNode result |
+	aUnclassifiedMethodCategoryRule := UnclassifiedMethodCategoryRule new.
+	aTestMethodNode := TestMethodNode for: self compiledUnclassified.
+	
+	result := aUnclassifiedMethodCategoryRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aUnclassifiedMethodCategoryRule class) message equals: result first message.! !
+
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 9/21/2022 23:12:21'!
+test02UnclassifiedMethodCategoryRuleSatisfied
+
+	| aUnclassifiedMethodCategoryRule aTestMethodNode result |
+	aUnclassifiedMethodCategoryRule := UnclassifiedMethodCategoryRule new.
+	aTestMethodNode := TestMethodNode for: self compiledClassified.
+	
+	result := aUnclassifiedMethodCategoryRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
+
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'compiled methods' stamp: 'FL 9/21/2022 23:30:00'!
+compiledClassified
+
+	^ self class compiledMethodAt: #test01UnclassifiedMethodCategoryRuleNotSatisfied! !
+
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'compiled methods' stamp: 'FL 9/21/2022 23:30:07'!
+compiledUnclassified
+
+	^ self class compiledMethodAt: #testunclassified! !
+
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'as yet unclassified' stamp: 'FL 9/21/2022 23:09:09'!
+testunclassified! !
+
+!UnclassifiedMethodCategoryRuleTest methodsFor: 'expected test smells' stamp: 'FL 9/21/2022 23:32:32'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testunclassified for: UnclassifiedMethodCategoryRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testunclassified for: AssertionlessTestRule because: 'Testing purpose')! !
+
 !WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 7/17/2022 17:47:19'!
 test01AssertWithoutEqualSymbolIsCorrectUsage
 
@@ -1442,18 +1504,19 @@ buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection
 	nodesTestLintFailuresDiccionary := Dictionary new.
 	aTestLintFailureCollection do: [:aTestLintFailure | self addTestLintFailure: aTestLintFailure toNode: aTestLintFailure node name].! !
 
-!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:20:07'!
-initializeFor: aTestLintFailureCollection 
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 9/19/2022 22:39:56'!
+initializeFor: aTestLintFailureCollection ofClass: aClass  
 	
+	linkedClass := aClass.
 	self buildNodesNamesListFrom: aTestLintFailureCollection.
 	nodesNamesListIndex := 0.
 	self buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection.
 	nodesTestLintFailuresDiccionaryIndex := 0.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/8/2022 21:41:22'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/19/2022 22:49:52'!
 browseExpectedTestSmells
 
-	! !
+	BrowserWindow fullOnClass: linkedClass selector: #expectedTestSmells! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 21:59:33'!
 browseMethodCategoryNode: aMethodCategoryNode 
@@ -1474,10 +1537,11 @@ browseTestClassNode: aTestClassNode
 browseTestMethodNode: aTestMethodNode 
 	BrowserWindow fullOnClass: aTestMethodNode linkedClass selector: aTestMethodNode compiledMethod selector! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/8/2022 21:40:05'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/19/2022 22:50:16'!
 hasExpectedTestSmells
 
-	^false "TODO"! !
+	linkedClass compiledMethodAt: #expectedTestSmells ifAbsent: [^false].
+	^true! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 19:56:44'!
 nodesNamesListIndex
@@ -1534,18 +1598,19 @@ nodesNamesList
 
 	^nodesNamesList ! !
 
-!TestLintResultModel class methodsFor: 'instance creation' stamp: 'FL 8/24/2022 19:38:11'!
-for: aTestLintFailureCollection 
+!TestLintResultModel class methodsFor: 'instance creation' stamp: 'FL 9/19/2022 22:39:38'!
+for: aTestLintFailureCollection ofClass: aClass  
 	
-	^self new initializeFor: aTestLintFailureCollection ! !
+	^self new initializeFor: aTestLintFailureCollection ofClass: aClass ! !
 
-!TestLintRunner methodsFor: 'initialization' stamp: 'FL 8/24/2022 19:36:42'!
+!TestLintRunner methodsFor: 'initialization' stamp: 'FL 9/19/2022 22:37:51'!
 initializeRun: aNode 
 	
-	| testLintFailures expectedTestSmells model |
-	expectedTestSmells := self getExpectedTestSmellsOf: aNode linkedClass.
+	| testLintFailures expectedTestSmells model linkedClass |
+	linkedClass _ aNode linkedClass.
+	expectedTestSmells := self getExpectedTestSmellsOf: linkedClass.
 	testLintFailures := (TestLint withRules: (self class testRules) andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
-	model := TestLintResultModel for: testLintFailures.
+	model := TestLintResultModel for: testLintFailures ofClass: linkedClass.
 	TestLintResultWindow displayTestLintResultFrom: model.! !
 
 !TestLintRunner methodsFor: 'accessing' stamp: 'FL 7/2/2022 12:31:57'!
@@ -1561,11 +1626,11 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 8/14/2022 19:07:37'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/21/2022 23:30:48'!
 testRules
 
 	| rules |
-	rules := Array new: 9.
+	rules := Array new: 10.
 	rules at: 1 put: AnonymousTestRule new.
 	rules at: 2 put: (LongTestRule withThreshold: 20).
 	rules at: 3 put: GuardedTestRule new.
@@ -1575,6 +1640,7 @@ testRules
 	rules at: 7 put: ProperOrganizationTestRule new.
 	rules at: 8 put: WrongAssertUsageTestRule new.
 	rules at: 9 put: (MagicLiteralsTestRule withThreshold: 5).
+	rules at: 10 put: UnclassifiedMethodCategoryRule new.
 
 	^ rules! !
 
@@ -2298,6 +2364,29 @@ So asserts should be together at the end of the test.'! !
 !ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:32'!
 title
 	^'Improper Organization'! !
+
+!UnclassifiedMethodCategoryRule methodsFor: 'execution' stamp: 'FL 9/21/2022 23:34:08'!
+isViolatedBy: aTestMethodNode 
+	
+	| classUnclassifiedSelectors |
+	
+	classUnclassifiedSelectors _ self getClassUnclassifiedSelectors: aTestMethodNode linkedClass.
+	^classUnclassifiedSelectors includes: aTestMethodNode name ! !
+
+!UnclassifiedMethodCategoryRule methodsFor: 'accessing' stamp: 'FL 9/21/2022 23:22:10'!
+getClassUnclassifiedSelectors: aClass
+	
+	^aClass organization listAtCategoryNamed: ClassOrganizer default! !
+
+!UnclassifiedMethodCategoryRule class methodsFor: 'message' stamp: 'FL 9/21/2022 22:54:33'!
+description
+	^'It has methods in the default category.
+	
+The method category name is useful to group a particular set of methods.'! !
+
+!UnclassifiedMethodCategoryRule class methodsFor: 'message' stamp: 'FL 9/21/2022 22:55:45'!
+title
+	^'Unclassified Method Category'! !
 
 !WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
 hasEqualMessageAsArgument: aMethodNode

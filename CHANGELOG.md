@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.16...HEAD)
+### Added
+- Rule for detecting unclassified tests.
+
 ### Changed
 - Improved Test Lint Result window where failures are grouped.
 
