@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 21 September 2022 at 11:35:54 pm'!
+'From Cuis 6.0 [latest update: #5093] on 22 September 2022 at 10:33:21 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 23!
+!provides: 'TestLint' 1 24!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -125,6 +125,16 @@ TestCase subclass: #TestLintTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'TestLintTest class' category: 'TestLint-Tests'!
 TestLintTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestMethodCategoryNameRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #TestMethodCategoryNameRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'TestMethodCategoryNameRuleTest class' category: 'TestLint-Tests'!
+TestMethodCategoryNameRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestMethodNodeTest category: 'TestLint-Tests'!
@@ -315,6 +325,16 @@ MethodCategoryRule subclass: #MixedSelectorsRule
 	category: 'TestLint-Model'!
 !classDefinition: 'MixedSelectorsRule class' category: 'TestLint-Model'!
 MixedSelectorsRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestMethodCategoryNameRule category: 'TestLint-Model'!
+MethodCategoryRule subclass: #TestMethodCategoryNameRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestMethodCategoryNameRule class' category: 'TestLint-Model'!
+TestMethodCategoryNameRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodRule category: 'TestLint-Model'!
@@ -1347,6 +1367,34 @@ setUp
 	strictLongTestRule := LongTestRule withThreshold: 0.
 	flexibleMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 3.! !
 
+!TestMethodCategoryNameRuleTest methodsFor: 'tests' stamp: 'FL 9/22/2022 22:26:49'!
+test01TestMethodCategoryNameRuleNotSatisfied
+
+	| aTestMethodCategoryNameRule aMethodCategoryNode results |
+	aTestMethodCategoryNameRule := TestMethodCategoryNameRule new.
+	aMethodCategoryNode := MethodCategoryNode for: #'.' of: TestMethodCategoryNameRuleTest categorizedWith: self class organization.
+	
+	results := aTestMethodCategoryNameRule runMethodCategory: aMethodCategoryNode.
+	
+	self assert: 1 equals: results size.
+	self assert: (TestSmell withNode: aMethodCategoryNode andRuleClass: aTestMethodCategoryNameRule class) message equals: results first message! !
+
+!TestMethodCategoryNameRuleTest methodsFor: 'tests' stamp: 'FL 9/22/2022 22:27:40'!
+test02TestMethodCategoryNameRuleSatisfied
+
+	| aTestMethodCategoryNameRule aMethodCategoryNode results |
+	aTestMethodCategoryNameRule := TestMethodCategoryNameRule new.
+	aMethodCategoryNode := MethodCategoryNode for: #'tests' of: TestMethodCategoryNameRuleTest categorizedWith: self class organization.
+	
+	results := aTestMethodCategoryNameRule runMethodCategory: aMethodCategoryNode.
+	
+	self assert: results isEmpty.! !
+
+!TestMethodCategoryNameRuleTest methodsFor: 'expected test smells' stamp: 'FL 9/22/2022 22:32:07'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #'.' for: TestMethodCategoryNameRule because: 'Testing purpose')! !
+
 !TestMethodNodeTest methodsFor: 'test objects' stamp: 'FL 5/29/2022 16:28:35'!
 compiledMethod
 
@@ -1626,11 +1674,11 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/21/2022 23:30:48'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/22/2022 22:30:29'!
 testRules
 
 	| rules |
-	rules := Array new: 10.
+	rules := Array new: 11.
 	rules at: 1 put: AnonymousTestRule new.
 	rules at: 2 put: (LongTestRule withThreshold: 20).
 	rules at: 3 put: GuardedTestRule new.
@@ -1641,6 +1689,7 @@ testRules
 	rules at: 8 put: WrongAssertUsageTestRule new.
 	rules at: 9 put: (MagicLiteralsTestRule withThreshold: 5).
 	rules at: 10 put: UnclassifiedMethodCategoryRule new.
+	rules at: 11 put: TestMethodCategoryNameRule new.
 
 	^ rules! !
 
@@ -2103,6 +2152,20 @@ strictly separating test-methods from other methods we get a better structure of
 !MixedSelectorsRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:10:19'!
 title
 	^'Mixed Selectors'! !
+
+!TestMethodCategoryNameRule methodsFor: 'execution' stamp: 'FL 9/22/2022 22:29:30'!
+isViolatedBy: aMethodCategoryNode 
+	^aMethodCategoryNode name size <= 1! !
+
+!TestMethodCategoryNameRule class methodsFor: 'message' stamp: 'FL 9/22/2022 22:15:48'!
+description
+	^'Method category has a meaningless name.
+	
+The method category name is useful to describe what set of methods contains.'! !
+
+!TestMethodCategoryNameRule class methodsFor: 'message' stamp: 'FL 9/22/2022 22:13:01'!
+title
+	^'Test-MethodCategory Name'! !
 
 !MethodRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 16:08:31'!
 runMethod: aMethodNode 
