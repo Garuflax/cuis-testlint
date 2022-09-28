@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 22 September 2022 at 10:33:21 pm'!
+'From Cuis 6.0 [latest update: #5093] on 27 September 2022 at 10:40:55 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 24!
+!provides: 'TestLint' 1 25!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -145,6 +145,16 @@ TestCase subclass: #TestMethodNodeTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'TestMethodNodeTest class' category: 'TestLint-Tests'!
 TestMethodNodeTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestWithReturnRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #TestWithReturnRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'TestWithReturnRuleTest class' category: 'TestLint-Tests'!
+TestWithReturnRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #UnclassifiedMethodCategoryRuleTest category: 'TestLint-Tests'!
@@ -405,6 +415,16 @@ MethodRule subclass: #ProperOrganizationTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'ProperOrganizationTestRule class' category: 'TestLint-Model'!
 ProperOrganizationTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestWithReturnRule category: 'TestLint-Model'!
+MethodRule subclass: #TestWithReturnRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestWithReturnRule class' category: 'TestLint-Model'!
+TestWithReturnRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #UnclassifiedMethodCategoryRule category: 'TestLint-Model'!
@@ -1409,6 +1429,49 @@ method
 test01CannotCreateTestMethodNodeWithoutATestMethod
 
 	self should: [TestMethodNode for: self compiledMethod] raise: Error withMessageText: TestMethodNode notATestMethodErrorDescription.! !
+
+!TestWithReturnRuleTest methodsFor: 'test objects' stamp: 'FL 9/27/2022 22:03:50'!
+testWithReturn
+
+	^self assert: 3 equals: 3! !
+
+!TestWithReturnRuleTest methodsFor: 'test objects' stamp: 'FL 9/27/2022 22:19:03'!
+testWithoutReturn
+
+	self assert: 3 equals: 3! !
+
+!TestWithReturnRuleTest methodsFor: 'compiled methods' stamp: 'FL 9/27/2022 22:02:59'!
+compiledTestWithReturn
+
+	^ self class compiledMethodAt: #testWithReturn! !
+
+!TestWithReturnRuleTest methodsFor: 'compiled methods' stamp: 'FL 9/27/2022 22:19:14'!
+compiledTestWithoutReturn
+
+	^ self class compiledMethodAt: #testWithoutReturn! !
+
+!TestWithReturnRuleTest methodsFor: 'tests' stamp: 'FL 9/27/2022 22:01:50'!
+test01TestWithReturnViolatesTestWithReturnRule
+
+	| aTestWithReturnRule aTestMethodNode result |
+	aTestWithReturnRule := TestWithReturnRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithReturn.
+	
+	result := aTestWithReturnRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aTestWithReturnRule class) message equals: result first message.! !
+
+!TestWithReturnRuleTest methodsFor: 'tests' stamp: 'FL 9/27/2022 22:06:05'!
+test02TestWithoutReturnDoesNotViolateTestWithReturnRule
+
+	| aTestWithReturnRule aTestMethodNode result |
+	aTestWithReturnRule := TestWithReturnRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutReturn.
+	
+	result := aTestWithReturnRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
 
 !UnclassifiedMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 9/21/2022 23:08:38'!
 test01UnclassifiedMethodCategoryRuleNotSatisfied
@@ -2427,6 +2490,27 @@ So asserts should be together at the end of the test.'! !
 !ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:32'!
 title
 	^'Improper Organization'! !
+
+!TestWithReturnRule methodsFor: 'execution' stamp: 'FL 9/27/2022 22:29:37'!
+isViolatedBy: aTestMethodNode 
+	| aMethodNode |
+	aMethodNode _ aTestMethodNode methodNode.
+	aMethodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | (node isReturn and: [(node isImplicitSelfReturnIn: aMethodNode) not]) ifTrue: [^true]]
+							).
+							
+	^false.! !
+
+!TestWithReturnRule class methodsFor: 'message' stamp: 'FL 9/27/2022 21:58:57'!
+description
+	^'It has a return.
+
+Tests should only assert that some functionality works correctly and not return something.
+Returning something gives the idea that it will be used with another purpose.'! !
+
+!TestWithReturnRule class methodsFor: 'message' stamp: 'FL 9/27/2022 21:56:20'!
+title
+	^'Has return'! !
 
 !UnclassifiedMethodCategoryRule methodsFor: 'execution' stamp: 'FL 9/21/2022 23:34:08'!
 isViolatedBy: aTestMethodNode 

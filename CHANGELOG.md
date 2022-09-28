@@ -6,6 +6,7 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.16...HEAD)
 ### Added
+- Rule for detecting tests with return.
 - Rule for detecting unclassified tests.
 - Rule for detecting method categories with a meaningless name.
 
