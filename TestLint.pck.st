@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 27 September 2022 at 10:40:55 pm'!
+'From Cuis 6.0 [latest update: #5093] on 28 September 2022 at 7:25:34 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 25!
+!provides: 'TestLint' 1 26!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -1473,6 +1473,11 @@ test02TestWithoutReturnDoesNotViolateTestWithReturnRule
 	
 	self assert: result isEmpty.! !
 
+!TestWithReturnRuleTest methodsFor: 'expected test smells' stamp: 'FL 9/28/2022 19:21:50'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testWithReturn for: TestWithReturnRule because: 'Testing purpose')! !
+
 !UnclassifiedMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 9/21/2022 23:08:38'!
 test01UnclassifiedMethodCategoryRuleNotSatisfied
 
@@ -1737,24 +1742,15 @@ run: aNode
 	
 	^self new initializeRun: aNode ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/22/2022 22:30:29'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/28/2022 19:17:03'!
+concreteTestRulesClasses
+
+	^MethodRule subclasses , MethodCategoryRule subclasses , ClassRule subclasses ! !
+
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/28/2022 19:18:01'!
 testRules
 
-	| rules |
-	rules := Array new: 11.
-	rules at: 1 put: AnonymousTestRule new.
-	rules at: 2 put: (LongTestRule withThreshold: 20).
-	rules at: 3 put: GuardedTestRule new.
-	rules at: 4 put: MixedSelectorsRule new.
-	rules at: 5 put: (MaxInstanceVariablesRule withThreshold: 10).
-	rules at: 6 put: AssertionlessTestRule new.
-	rules at: 7 put: ProperOrganizationTestRule new.
-	rules at: 8 put: WrongAssertUsageTestRule new.
-	rules at: 9 put: (MagicLiteralsTestRule withThreshold: 5).
-	rules at: 10 put: UnclassifiedMethodCategoryRule new.
-	rules at: 11 put: TestMethodCategoryNameRule new.
-
-	^ rules! !
+	^self concreteTestRulesClasses collect: [:class | class newWithDefaults ]! !
 
 !AssertionChecker methodsFor: 'initialization' stamp: 'FL 7/10/2022 21:19:21'!
 initializeFor: aMessageNode ofClass: aClass 
@@ -2129,6 +2125,11 @@ title
 
 	self subclassResponsibility ! !
 
+!Rule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:07:41'!
+newWithDefaults
+
+	^self new! !
+
 !ClassRule methodsFor: 'evaluating' stamp: 'FL 6/8/2022 19:14:51'!
 runClass: aTestClassNode 
 	^self runForReal: aTestClassNode.! !
@@ -2141,6 +2142,11 @@ initializeWithThreshold: aThreshold
 !MaxInstanceVariablesRule methodsFor: 'execution' stamp: 'FL 6/8/2022 19:40:31'!
 isViolatedBy: aTestClassNode 
 	^aTestClassNode linkedClass instVarNames size > threshold! !
+
+!MaxInstanceVariablesRule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:08:33'!
+newWithDefaults
+
+	^self withThreshold: 10! !
 
 !MaxInstanceVariablesRule class methodsFor: 'instance creation' stamp: 'FL 6/8/2022 19:48:06'!
 withThreshold: aThreshold 
@@ -2360,6 +2366,11 @@ validThreshold: aThreshold
 
 	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
 
+!LongTestRule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:09:40'!
+newWithDefaults
+
+	^self withThreshold: 20! !
+
 !LongTestRule class methodsFor: 'instance creation' stamp: 'FL 5/29/2022 15:22:03'!
 withThreshold: aThreshold 
 
@@ -2416,6 +2427,11 @@ description
 !MagicLiteralsTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:12:39'!
 title
 	^'Magic Literals'! !
+
+!MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:10:11'!
+newWithDefaults
+
+	^self withThreshold: 5! !
 
 !MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 8/14/2022 18:50:14'!
 withThreshold: aThreshold 
