@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 28 September 2022 at 7:25:34 pm'!
+'From Cuis 6.0 [latest update: #5093] on 5 October 2022 at 9:56:21 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 26!
+!provides: 'TestLint' 1 27!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -189,7 +189,7 @@ TestLintBrowserMenus class
 
 !classDefinition: #TestLintResultModel category: 'TestLint-GUI'!
 Object subclass: #TestLintResultModel
-	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex linkedClass'
+	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex nodeTestSmellsIndex nodeMissingTestSmellsIndex linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
@@ -545,12 +545,12 @@ browseButton
 	
 	^ browseButton! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/14/2022 20:02:33'!
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 10/4/2022 15:56:01'!
 buildMorphicWindow
 	
 	self layoutMorph 
 		addMorph: self nodesList proportionalHeight: 0.20;
-		addAdjusterAndMorph: self resultsList proportionalHeight: 0.20;
+		addAdjusterAndMorph: self testLintFailuresLists proportionalHeight: 0.20;
 		addAdjusterAndMorph: self detail proportionalHeight: 0.60;
 		addAdjusterAndMorph: self buttonPanel fixedHeight: self defaultButtonPaneHeight.! !
 
@@ -584,6 +584,14 @@ expectedTestSmellsButton
 	
 	^ browseButton! !
 
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 10/4/2022 17:29:16'!
+missingTestSmellsList
+
+	| resultsList |
+	resultsList := PluggableListMorph model: model listGetter: #selectedNodeMissingTestSmellsTitles indexGetter: #nodeMissingTestSmellsIndex indexSetter: #nodeMissingTestSmellsIndex:.
+	"model when: #selectedNodeChanged send: #refetch to: resultsList model. TODO"
+	^resultsList.! !
+
 !TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 8/24/2022 19:59:34'!
 nodesList
 
@@ -593,11 +601,20 @@ nodesList
 	
 	^nodesList.! !
 
-!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/14/2022 19:52:36'!
-resultsList
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 10/4/2022 17:38:33'!
+testLintFailuresLists
+
+	| row |
+	row _ LayoutMorph newRow.
+	row doAdoptWidgetsColor.
+	row addMorphs: (Array with: self testSmellsList with: self missingTestSmellsList).
+	^ row! !
+
+!TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 10/4/2022 17:17:47'!
+testSmellsList
 
 	| resultsList |
-	resultsList := PluggableListMorph model: model listGetter: #selectedNodeTestLintFailuresTitles indexGetter: #nodesTestLintFailuresDiccionaryIndex indexSetter: #nodesTestLintFailuresDiccionaryIndex:.
+	resultsList := PluggableListMorph model: model listGetter: #selectedNodeTestSmellsTitles indexGetter: #nodeTestSmellsIndex indexSetter: #nodeTestSmellsIndex:.
 	"model when: #selectedNodeChanged send: #refetch to: resultsList model. TODO"
 	^resultsList.! !
 
@@ -1620,14 +1637,52 @@ buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection
 	nodesTestLintFailuresDiccionary := Dictionary new.
 	aTestLintFailureCollection do: [:aTestLintFailure | self addTestLintFailure: aTestLintFailure toNode: aTestLintFailure node name].! !
 
-!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 9/19/2022 22:39:56'!
+!TestLintResultModel methodsFor: 'initialization' stamp: 'FL 10/4/2022 17:28:52'!
 initializeFor: aTestLintFailureCollection ofClass: aClass  
 	
 	linkedClass := aClass.
 	self buildNodesNamesListFrom: aTestLintFailureCollection.
 	nodesNamesListIndex := 0.
 	self buildNodesTestLintFailuresDiccionaryFrom: aTestLintFailureCollection.
-	nodesTestLintFailuresDiccionaryIndex := 0.! !
+	nodesTestLintFailuresDiccionaryIndex := 0.
+	nodeTestSmellsIndex := 0.
+	nodeMissingTestSmellsIndex := 0.! !
+
+!TestLintResultModel methodsFor: 'failures manipulation' stamp: 'FL 10/4/2022 16:51:35'!
+getTitlesOf: aTestLintFailureCollection
+
+	^aTestLintFailureCollection collect: [:aTestLintFailure | aTestLintFailure title].! !
+
+!TestLintResultModel methodsFor: 'failures manipulation' stamp: 'FL 10/4/2022 16:47:56'!
+selectSelectedNodeTestLintFailures: aBlock
+
+	^self selectedNodeTestLintFailures select: aBlock ! !
+
+!TestLintResultModel methodsFor: 'updating' stamp: 'FL 10/5/2022 21:55:25'!
+nodeMissingTestSmellsIndex: anInteger
+
+	nodeMissingTestSmellsIndex := anInteger.
+	nodesTestLintFailuresDiccionaryIndex := anInteger isZero ifTrue: [0] ifFalse: [self selectedNodeTestSmells size + anInteger].
+	self triggerEvent: #selectedTestLintFailureChanged.! !
+
+!TestLintResultModel methodsFor: 'updating' stamp: 'FL 10/5/2022 21:55:20'!
+nodeTestSmellsIndex: anInteger
+
+	nodeTestSmellsIndex := anInteger.
+	nodesTestLintFailuresDiccionaryIndex := anInteger.
+	self triggerEvent: #selectedTestLintFailureChanged.! !
+
+!TestLintResultModel methodsFor: 'updating' stamp: 'FL 10/5/2022 21:49:11'!
+nodesNamesListIndex: anInteger
+
+	nodesNamesListIndex := anInteger.
+	nodeTestSmellsIndex := 0.
+	nodeMissingTestSmellsIndex := 0.
+	nodesTestLintFailuresDiccionaryIndex := 0.
+	self changed: #selectedNodeTestSmellsTitles.
+	self changed: #selectedNodeMissingTestSmellsTitles.
+	self triggerEvent: #selectedNodeChanged.
+	self triggerEvent: #selectedTestLintFailureChanged.! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/19/2022 22:49:52'!
 browseExpectedTestSmells
@@ -1659,33 +1714,20 @@ hasExpectedTestSmells
 	linkedClass compiledMethodAt: #expectedTestSmells ifAbsent: [^false].
 	^true! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 19:56:44'!
-nodesNamesListIndex
-
-	^nodesNamesListIndex ! !
-
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:52:36'!
-nodesNamesListIndex: anInteger
-
-	nodesNamesListIndex := anInteger.
-	self changed: #selectedNodeTestLintFailuresTitles.
-	self triggerEvent: #selectedNodeChanged.! !
-
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:21:46'!
-nodesTestLintFailuresDiccionaryIndex
-
-	^nodesTestLintFailuresDiccionaryIndex ! !
-
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:49:35'!
-nodesTestLintFailuresDiccionaryIndex: anInteger
-
-	nodesTestLintFailuresDiccionaryIndex := anInteger.
-	self triggerEvent: #selectedTestLintFailureChanged.! !
-
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:55'!
 selectedNode
 
 	^self selectedNodeTestLintFailures ifEmpty: [NullNode new] ifNotEmpty: [:c | c anyOne node]! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/4/2022 16:48:33'!
+selectedNodeMissingTestSmells
+
+	^self selectSelectedNodeTestLintFailures: [:testLintFailure | testLintFailure isMissingTestSmell ]. ! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/4/2022 17:08:08'!
+selectedNodeMissingTestSmellsTitles
+
+	^self getTitlesOf: self selectedNodeMissingTestSmells.! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 20:25:33'!
 selectedNodeName
@@ -1698,10 +1740,15 @@ selectedNodeTestLintFailures
 	nodesNamesListIndex = 0 ifTrue: [^OrderedCollection new].
 	^nodesTestLintFailuresDiccionary at: self selectedNodeName.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:47'!
-selectedNodeTestLintFailuresTitles
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/4/2022 16:48:24'!
+selectedNodeTestSmells
 
-	^self selectedNodeTestLintFailures collect: [:aTestLintFailure | aTestLintFailure title].! !
+	^self selectSelectedNodeTestLintFailures: [:testLintFailure | testLintFailure isTestSmell ]. ! !
+
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/4/2022 17:08:19'!
+selectedNodeTestSmellsTitles
+
+	^self getTitlesOf: self selectedNodeTestSmells.! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:52:38'!
 selectedTestLintFailureDetail
@@ -1709,10 +1756,30 @@ selectedTestLintFailureDetail
 	(nodesNamesListIndex = 0 or: [nodesTestLintFailuresDiccionaryIndex = 0]) ifTrue: [^''].
 	^((nodesTestLintFailuresDiccionary at: self selectedNodeName) at: nodesTestLintFailuresDiccionaryIndex) message ! !
 
+!TestLintResultModel methodsFor: 'accessing' stamp: 'FL 10/4/2022 16:43:33'!
+nodeMissingTestSmellsIndex
+
+	^nodeMissingTestSmellsIndex ! !
+
+!TestLintResultModel methodsFor: 'accessing' stamp: 'FL 10/4/2022 16:34:52'!
+nodeTestSmellsIndex
+
+	^nodeTestSmellsIndex ! !
+
 !TestLintResultModel methodsFor: 'accessing' stamp: 'FL 8/24/2022 19:57:50'!
 nodesNamesList
 
 	^nodesNamesList ! !
+
+!TestLintResultModel methodsFor: 'accessing' stamp: 'FL 8/24/2022 19:56:44'!
+nodesNamesListIndex
+
+	^nodesNamesListIndex ! !
+
+!TestLintResultModel methodsFor: 'accessing' stamp: 'FL 8/24/2022 20:21:46'!
+nodesTestLintFailuresDiccionaryIndex
+
+	^nodesTestLintFailuresDiccionaryIndex ! !
 
 !TestLintResultModel class methodsFor: 'instance creation' stamp: 'FL 9/19/2022 22:39:38'!
 for: aTestLintFailureCollection ofClass: aClass  
@@ -2684,6 +2751,16 @@ title
 
 	self subclassResponsibility ! !
 
+!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:41'!
+isMissingTestSmell
+
+	^false! !
+
+!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:45'!
+isTestSmell
+
+	^false! !
+
 !MissingTestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:55:09'!
 initializeWithNode: aNode andRuleClass: aRuleClass because: aDescription  
 	
@@ -2698,6 +2775,11 @@ message
 !MissingTestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:54:29'!
 title
 	^ruleClass title, ' (EXPECTED)'.! !
+
+!MissingTestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:14'!
+isMissingTestSmell
+
+	^true! !
 
 !MissingTestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:59:37'!
 withNode: aNode andRuleClass: aRuleClass because: aDescription  
@@ -2718,6 +2800,11 @@ message
 !TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:41'!
 title
 	^ruleClass title! !
+
+!TestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:01'!
+isTestSmell
+
+	^true! !
 
 !TestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:58:07'!
 withNode: aNode andRuleClass: aRuleClass   

@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.16...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.27...HEAD)
+
+## [1.27](https://github.com/Garuflax/cuis-testlint/compare/v1.16...v1.27) - 2022-10-05
 ### Added
 - Rule for detecting tests with return.
 - Rule for detecting unclassified tests.
