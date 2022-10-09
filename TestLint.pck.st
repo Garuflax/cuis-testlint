@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 5 October 2022 at 9:56:21 pm'!
+'From Cuis 6.0 [latest update: #5093] on 9 October 2022 at 7:42:05 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 27!
+!provides: 'TestLint' 1 28!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -167,6 +167,16 @@ TestCase subclass: #UnclassifiedMethodCategoryRuleTest
 UnclassifiedMethodCategoryRuleTest class
 	instanceVariableNames: ''!
 
+!classDefinition: #UnusedSharedFixtureVariablesRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #UnusedSharedFixtureVariablesRuleTest
+	instanceVariableNames: 'unused'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'UnusedSharedFixtureVariablesRuleTest class' category: 'TestLint-Tests'!
+UnusedSharedFixtureVariablesRuleTest class
+	instanceVariableNames: ''!
+
 !classDefinition: #WrongAssertUsageTestRuleTest category: 'TestLint-Tests'!
 TestCase subclass: #WrongAssertUsageTestRuleTest
 	instanceVariableNames: ''
@@ -315,6 +325,16 @@ ClassRule subclass: #MaxInstanceVariablesRule
 	category: 'TestLint-Model'!
 !classDefinition: 'MaxInstanceVariablesRule class' category: 'TestLint-Model'!
 MaxInstanceVariablesRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnusedSharedFixtureVariablesRule category: 'TestLint-Model'!
+ClassRule subclass: #UnusedSharedFixtureVariablesRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'UnusedSharedFixtureVariablesRule class' category: 'TestLint-Model'!
+UnusedSharedFixtureVariablesRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodCategoryRule category: 'TestLint-Model'!
@@ -1536,6 +1556,80 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testunclassified for: UnclassifiedMethodCategoryRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testunclassified for: AssertionlessTestRule because: 'Testing purpose')! !
 
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'initialization' stamp: 'FL 10/9/2022 19:11:50'!
+setUp
+
+	unused := Object new.! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 19:08:07'!
+classWithInstanceVariableNotUsedInTest
+	
+	^Smalltalk classNamed: 'UnusedSharedFixtureVariablesRuleTest'! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 19:36:58'!
+classWithInstanceVariablesThatAreUsed
+	
+	^Smalltalk classNamed: 'TestLintTest'! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 18:30:24'!
+classWithUnusedInstanceVariable
+	
+	^Smalltalk classNamed: 'MaxInstanceVariablesRuleTest'! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 18:27:12'!
+classWithoutInstanceVariables
+
+	^ Smalltalk classNamed: 'AnonymousTestRuleTest'! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/9/2022 18:29:02'!
+test01ClassWithoutInstanceVariablesDoesNotViolateRule
+
+    | anUnusedSharedFixtureVariablesRule result |
+    anUnusedSharedFixtureVariablesRule := UnusedSharedFixtureVariablesRule new.
+    
+    result := anUnusedSharedFixtureVariablesRule runClass: (TestClassNode for: self classWithoutInstanceVariables).
+    
+    self assert: result isEmpty.! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/9/2022 18:32:43'!
+test02ClassWithUnusedInstanceVariableViolatesRule
+
+    | anUnusedSharedFixtureVariablesRule aTestClassNode results |
+    anUnusedSharedFixtureVariablesRule := UnusedSharedFixtureVariablesRule new.
+    aTestClassNode := TestClassNode for: self classWithUnusedInstanceVariable.
+    
+    results := anUnusedSharedFixtureVariablesRule runClass: aTestClassNode.
+    
+    self assert: 1 equals: results size.
+    self assert: (TestSmell withNode: aTestClassNode andRuleClass: anUnusedSharedFixtureVariablesRule class) message equals: results first message.! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/9/2022 19:07:14'!
+test03ClassWithInstanceVariableNotUsedInTestViolatesRule
+
+    | anUnusedSharedFixtureVariablesRule aTestClassNode results |
+    anUnusedSharedFixtureVariablesRule := UnusedSharedFixtureVariablesRule new.
+    aTestClassNode := TestClassNode for: self classWithInstanceVariableNotUsedInTest.
+    
+    results := anUnusedSharedFixtureVariablesRule runClass: aTestClassNode.
+    
+    self assert: 1 equals: results size.
+    self assert: (TestSmell withNode: aTestClassNode andRuleClass: anUnusedSharedFixtureVariablesRule class) message equals: results first message.! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/9/2022 19:36:58'!
+test04ClassThatUsesItsInstanceVariablesDoesNotViolateRule
+
+    | anUnusedSharedFixtureVariablesRule result |
+    anUnusedSharedFixtureVariablesRule := UnusedSharedFixtureVariablesRule new.
+    
+    result := anUnusedSharedFixtureVariablesRule runClass: (TestClassNode for: self classWithInstanceVariablesThatAreUsed).
+    
+    self assert: result isEmpty.! !
+
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'expected test smells' stamp: 'FL 10/9/2022 19:40:23'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #UnusedSharedFixtureVariablesRuleTest for: UnusedSharedFixtureVariablesRule because: 'Testing purpose')! !
+
 !WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 7/17/2022 17:47:19'!
 test01AssertWithoutEqualSymbolIsCorrectUsage
 
@@ -2242,6 +2336,34 @@ errorInvalidThreshold
 !MaxInstanceVariablesRule class methodsFor: 'assertions' stamp: 'FL 6/8/2022 19:48:47'!
 validThreshold: aThreshold 
 	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
+
+!UnusedSharedFixtureVariablesRule methodsFor: 'evaluating' stamp: 'FL 10/9/2022 19:37:37'!
+isInstanceVariable: anInstanceVariableName usedInClass: aClass
+
+	^(aClass whichSelectorsAccess: anInstanceVariableName) anySatisfy: [ :aSelector | self isTest: aSelector ].! !
+
+!UnusedSharedFixtureVariablesRule methodsFor: 'execution' stamp: 'FL 10/9/2022 19:24:12'!
+isViolatedBy: aTestClassNode
+
+	| instanceVariables nodeLinkedClass |
+	nodeLinkedClass := aTestClassNode linkedClass.
+	instanceVariables := nodeLinkedClass instVarNames.
+	instanceVariables do: [ :instVarName | (self isInstanceVariable: instVarName usedInClass: nodeLinkedClass) ifFalse: [
+			^true]].
+	^false! !
+
+!UnusedSharedFixtureVariablesRule methodsFor: 'testing' stamp: 'FL 10/9/2022 19:33:24'!
+isTest: aSelector
+
+	^ (aSelector beginsWith: 'test') and: [ aSelector numArgs = 0 ]! !
+
+!UnusedSharedFixtureVariablesRule class methodsFor: 'message' stamp: 'FL 10/9/2022 19:03:17'!
+description
+	^'All instance variables of the test class should be used in a test at least.'! !
+
+!UnusedSharedFixtureVariablesRule class methodsFor: 'message' stamp: 'FL 10/9/2022 19:04:09'!
+title
+	^'Unused Shared-Fixture Variables'! !
 
 !MethodCategoryRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 16:05:43'!
 runMethodCategory: aMethodCategoryNode 

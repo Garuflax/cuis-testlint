@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.27...HEAD)
+### Added
+- Rule for detecting test classes that do not use one of its instance variables.
 
 ## [1.27](https://github.com/Garuflax/cuis-testlint/compare/v1.16...v1.27) - 2022-10-05
 ### Added
