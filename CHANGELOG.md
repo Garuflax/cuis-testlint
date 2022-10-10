@@ -7,6 +7,10 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.27...HEAD)
 ### Added
 - Rule for detecting test classes that do not use one of its instance variables.
+- Rule for detecting tests that call a test.
+
+### Fixed
+- Assertionless test rule now has less false positives.
 
 ## [1.27](https://github.com/Garuflax/cuis-testlint/compare/v1.16...v1.27) - 2022-10-05
 ### Added

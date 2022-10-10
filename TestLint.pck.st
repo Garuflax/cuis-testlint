@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 9 October 2022 at 7:42:05 pm'!
+'From Cuis 6.0 [latest update: #5093] on 10 October 2022 at 4:25:56 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 28!
+!provides: 'TestLint' 1 29!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -79,7 +79,7 @@ MagicLiteralsTestRuleTest class
 
 !classDefinition: #MaxInstanceVariablesRuleTest category: 'TestLint-Tests'!
 TestCase subclass: #MaxInstanceVariablesRuleTest
-	instanceVariableNames: 'unused'
+	instanceVariableNames: 'testClassNodeWithOneInstanceVariable'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
@@ -175,6 +175,16 @@ TestCase subclass: #UnusedSharedFixtureVariablesRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'UnusedSharedFixtureVariablesRuleTest class' category: 'TestLint-Tests'!
 UnusedSharedFixtureVariablesRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnusualTestOrderRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #UnusualTestOrderRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'UnusualTestOrderRuleTest class' category: 'TestLint-Tests'!
+UnusualTestOrderRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #WrongAssertUsageTestRuleTest category: 'TestLint-Tests'!
@@ -455,6 +465,16 @@ MethodRule subclass: #UnclassifiedMethodCategoryRule
 	category: 'TestLint-Model'!
 !classDefinition: 'UnclassifiedMethodCategoryRule class' category: 'TestLint-Model'!
 UnclassifiedMethodCategoryRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #UnusualTestOrderRule category: 'TestLint-Model'!
+MethodRule subclass: #UnusualTestOrderRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'UnusualTestOrderRule class' category: 'TestLint-Model'!
+UnusualTestOrderRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #WrongAssertUsageTestRule category: 'TestLint-Model'!
@@ -1060,32 +1080,36 @@ compiledTestWithNoLiterals
 
 	^ self class compiledMethodAt: #testWithNoLiterals! !
 
-!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:21:03'!
+!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/10/2022 16:24:52'!
 test01MaxInstanceVariablesRuleSatisfied
 
     | aMaxInstanceVariablesRule result |
     aMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 1.
     
-    result := aMaxInstanceVariablesRule runClass: (TestClassNode for: (Smalltalk classNamed: 'MaxInstanceVariablesRuleTest')).
+    result := aMaxInstanceVariablesRule runClass: testClassNodeWithOneInstanceVariable.
     
     self assert: result isEmpty.! !
 
-!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 9/1/2022 20:02:03'!
+!MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 10/10/2022 16:24:52'!
 test02MaxInstanceVariablesRuleNotSatisfied
 
-    | aMaxInstanceVariablesRule results aTestClassNode |
+    | aMaxInstanceVariablesRule results |
     aMaxInstanceVariablesRule := MaxInstanceVariablesRule withThreshold: 0.
-    aTestClassNode := TestClassNode for: (Smalltalk classNamed: 'MaxInstanceVariablesRuleTest').
     
-    results := aMaxInstanceVariablesRule runClass: aTestClassNode.
+    results := aMaxInstanceVariablesRule runClass: testClassNodeWithOneInstanceVariable.
     
     self assert: 1 equals: results size.
-    self assert: (TestSmell withNode: aTestClassNode andRuleClass: aMaxInstanceVariablesRule class) message equals: results first message.! !
+    self assert: (TestSmell withNode: testClassNodeWithOneInstanceVariable andRuleClass: aMaxInstanceVariablesRule class) message equals: results first message.! !
 
 !MaxInstanceVariablesRuleTest methodsFor: 'tests' stamp: 'FL 6/8/2022 19:44:10'!
 test03CannotCreateMaxInstanceVariablesRuleWithNegativeThreshold
 
 	self should: [MaxInstanceVariablesRule withThreshold: -1] raise: Error withMessageText: MaxInstanceVariablesRule invalidThresholdDescription.! !
+
+!MaxInstanceVariablesRuleTest methodsFor: 'initialization' stamp: 'FL 10/10/2022 16:24:52'!
+setUp
+
+	testClassNodeWithOneInstanceVariable := TestClassNode for: (Smalltalk classNamed: 'MaxInstanceVariablesRuleTest').! !
 
 !MixedSelectorsRuleTest methodsFor: 'test objects mixed' stamp: 'FL 5/25/2022 18:34:23'!
 method100
@@ -1630,6 +1654,71 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #UnusedSharedFixtureVariablesRuleTest for: UnusedSharedFixtureVariablesRule because: 'Testing purpose')! !
 
+!UnusualTestOrderRuleTest methodsFor: 'tests' stamp: 'FL 10/10/2022 15:33:24'!
+test01TestThatDoesNotCallATestDoesNotViolateRule
+
+    | anUnusualTestOrderRule aTestMethodNode result |
+    anUnusualTestOrderRule := UnusualTestOrderRule new.
+    aTestMethodNode := TestMethodNode for: self compiledTestThatDoesNotCallAnyTest.
+    
+    result := anUnusualTestOrderRule runMethod: aTestMethodNode.
+    
+    self assert: result isEmpty.! !
+
+!UnusualTestOrderRuleTest methodsFor: 'tests' stamp: 'FL 10/10/2022 15:33:16'!
+test02TestThatCallsATestDoesNotViolateRule
+
+    | anUnusualTestOrderRule aTestMethodNode result |
+    anUnusualTestOrderRule := UnusualTestOrderRule new.
+    aTestMethodNode := TestMethodNode for: self compiledTestThatCallsAnotherTest.
+    
+    result := anUnusualTestOrderRule runMethod: aTestMethodNode.
+    
+    self assert: 1 equals: result size.
+    self assert: (TestSmell withNode: aTestMethodNode andRuleClass: anUnusualTestOrderRule class) message equals: result first message.! !
+
+!UnusualTestOrderRuleTest methodsFor: 'tests' stamp: 'FL 10/10/2022 15:59:44'!
+test03TestThatCallsAMethodThatSeemsToBeATestButIsNotDoesNotViolateRule
+
+    | anUnusualTestOrderRule aTestMethodNode result |
+    anUnusualTestOrderRule := UnusualTestOrderRule new.
+    aTestMethodNode := TestMethodNode for: self compiledTestThatFeintsToCallAnotherTest.
+    
+    result := anUnusualTestOrderRule runMethod: aTestMethodNode.
+    
+    self assert: result isEmpty.! !
+
+!UnusualTestOrderRuleTest methodsFor: 'expected test smells' stamp: 'FL 10/10/2022 16:13:13'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testThatCallsTest for: UnusualTestOrderRule because: 'Testing purpose')! !
+
+!UnusualTestOrderRuleTest methodsFor: 'test objects' stamp: 'FL 10/10/2022 15:34:40'!
+testThatCallsTest
+
+	self test01TestThatDoesNotCallATestDoesNotViolateRule.
+	self assert: 1 equals: 1.! !
+
+!UnusualTestOrderRuleTest methodsFor: 'test objects' stamp: 'FL 10/10/2022 16:19:37'!
+testThatFeintsToCallTest
+
+	self shouldFail: [Object test].! !
+
+!UnusualTestOrderRuleTest methodsFor: 'compiled methods' stamp: 'FL 10/10/2022 15:34:53'!
+compiledTestThatCallsAnotherTest
+
+	^ self class compiledMethodAt: #testThatCallsTest! !
+
+!UnusualTestOrderRuleTest methodsFor: 'compiled methods' stamp: 'FL 10/10/2022 15:30:57'!
+compiledTestThatDoesNotCallAnyTest
+
+	^ self class compiledMethodAt: #test01TestThatDoesNotCallATestDoesNotViolateRule! !
+
+!UnusualTestOrderRuleTest methodsFor: 'compiled methods' stamp: 'FL 10/10/2022 16:07:30'!
+compiledTestThatFeintsToCallAnotherTest
+
+	^ self class compiledMethodAt: #testThatFeintsToCallTest! !
+
 !WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 7/17/2022 17:47:19'!
 test01AssertWithoutEqualSymbolIsCorrectUsage
 
@@ -1961,10 +2050,10 @@ for: aMessageNode ofClass: aClass
 	
 	^self new initializeFor: aMessageNode ofClass: aClass ! !
 
-!AssertionChecker class methodsFor: 'selectors list' stamp: 'FL 7/11/2022 19:06:03'!
+!AssertionChecker class methodsFor: 'selectors list' stamp: 'FL 10/10/2022 16:19:00'!
 assertionSelectors
 
-	^Array with: #assert:description: with: #assert:! !
+	^Array with: #assert:description: with: #assert: with: #should:raise:withExceptionDo:description: with: #shouldnt:raise:description:! !
 
 !ExpectedTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 16:46:20'!
 initializeIn: aNode for: aRuleClass because: aDescription 
@@ -2454,27 +2543,6 @@ Tests can be regarded as documentation, and the name is an important part of tha
 title
 	^'Anonymous'! !
 
-!AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/3/2022 15:59:26'!
-getAllSelectorsCalledInClassHierarchy: aMethodNode 
-	
-	| allSelectorsCalledInClassHierarchy missingMethodNodesToVisit methodNodeClass |
-	methodNodeClass := aMethodNode methodClass.
-	allSelectorsCalledInClassHierarchy := OrderedCollection new.
-	missingMethodNodesToVisit := OrderedCollection with: aMethodNode.
-	
-	[missingMethodNodesToVisit notEmpty ] whileTrue: [| currentMethodNode |
-		currentMethodNode := missingMethodNodesToVisit removeFirst.
-		currentMethodNode accept: (ParseNodeEnumerator
-							ofBlock: [:node | node isMessageNode ifTrue: [
-									((node receiverOrCascadeReceiver isSelfPseudoVariable or: [node receiverOrCascadeReceiver isSuperPseudoVariable ]) and: [(allSelectorsCalledInClassHierarchy includes: node selectorSymbol) not]) ifTrue: [
-										missingMethodNodesToVisit add:( methodNodeClass withSuperclassThatIncludesSelector: node selectorSymbol do: [ :class | (class compiledMethodAt: node selectorSymbol) methodNode] ifNone: [(methodNodeClass compiledMethodAt: node selectorSymbol) methodNode])].
-									allSelectorsCalledInClassHierarchy add: node selectorSymbol.
-									 ]]
-							).
-		].
-	
-	^allSelectorsCalledInClassHierarchy ! !
-
 !AssertionlessTestRule methodsFor: 'execution' stamp: 'FL 7/11/2022 20:23:09'!
 isViolatedBy: aTestMethodNode 
 
@@ -2739,6 +2807,36 @@ The method category name is useful to group a particular set of methods.'! !
 !UnclassifiedMethodCategoryRule class methodsFor: 'message' stamp: 'FL 9/21/2022 22:55:45'!
 title
 	^'Unclassified Method Category'! !
+
+!UnusualTestOrderRule methodsFor: 'execution' stamp: 'FL 10/10/2022 15:43:30'!
+isViolatedBy: aTestMethodNode
+
+	aTestMethodNode methodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node | (self isTestMessageNode: node) ifTrue: [^true]]
+							).
+	^false! !
+
+!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/10/2022 16:10:29'!
+isSelfOrSuperPseudoVariable: aLiteralVariableNode 
+	^aLiteralVariableNode isSelfPseudoVariable or: [aLiteralVariableNode isSuperPseudoVariable ]! !
+
+!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/10/2022 16:09:26'!
+isTestMessageNode: aNode 
+	
+	^aNode isMessageNode and: [self isSelfOrSuperPseudoVariable: aNode receiverOrCascadeReceiver] and: [self isTestSelectorSymbol: aNode selectorSymbol]! !
+
+!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/10/2022 15:56:18'!
+isTestSelectorSymbol: aSelector
+	
+	^(aSelector beginsWith: 'test') and: [ aSelector numArgs = 0 ]! !
+
+!UnusualTestOrderRule class methodsFor: 'message' stamp: 'FL 10/10/2022 15:57:09'!
+description
+	^'Tests should not call other tests.'! !
+
+!UnusualTestOrderRule class methodsFor: 'message' stamp: 'FL 10/10/2022 15:57:31'!
+title
+	^'Unusual Test Order'! !
 
 !WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
 hasEqualMessageAsArgument: aMethodNode
