@@ -9,6 +9,9 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 - Rule for detecting test classes that do not use one of its instance variables.
 - Rule for detecting tests that call a test.
 
+### Changed
+- Prints message when no test lint failures are detected.
+
 ### Fixed
 - Assertionless test rule now has less false positives.
 

@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5093] on 10 October 2022 at 4:25:56 pm'!
+'From Cuis 6.0 [latest update: #5495] on 23 October 2022 at 3:57:15 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 29!
+!provides: 'TestLint' 1 30!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -169,7 +169,7 @@ UnclassifiedMethodCategoryRuleTest class
 
 !classDefinition: #UnusedSharedFixtureVariablesRuleTest category: 'TestLint-Tests'!
 TestCase subclass: #UnusedSharedFixtureVariablesRuleTest
-	instanceVariableNames: 'unused'
+	instanceVariableNames: 'notUsedInTest unused'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
@@ -257,18 +257,58 @@ Object subclass: #ExpectedTestSmellInformation
 ExpectedTestSmellInformation class
 	instanceVariableNames: ''!
 
-!classDefinition: #Node category: 'TestLint-Model'!
-Object subclass: #Node
+!classDefinition: #TestLint category: 'TestLint-Model'!
+Object subclass: #TestLint
+	instanceVariableNames: 'rules ruleCollection expectedFailures node notExpectedTestSmells notSatisfiedExpectations'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestLint class' category: 'TestLint-Model'!
+TestLint class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestLintFailure category: 'TestLint-Model'!
+Object subclass: #TestLintFailure
+	instanceVariableNames: 'node ruleClass'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestLintFailure class' category: 'TestLint-Model'!
+TestLintFailure class
+	instanceVariableNames: ''!
+
+!classDefinition: #MissingTestSmell category: 'TestLint-Model'!
+TestLintFailure subclass: #MissingTestSmell
+	instanceVariableNames: 'description'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'MissingTestSmell class' category: 'TestLint-Model'!
+MissingTestSmell class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestSmell category: 'TestLint-Model'!
+TestLintFailure subclass: #TestSmell
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'Node class' category: 'TestLint-Model'!
-Node class
+!classDefinition: 'TestSmell class' category: 'TestLint-Model'!
+TestSmell class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestLintNode category: 'TestLint-Model'!
+Object subclass: #TestLintNode
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestLintNode class' category: 'TestLint-Model'!
+TestLintNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodCategoryNode category: 'TestLint-Model'!
-Node subclass: #MethodCategoryNode
+TestLintNode subclass: #MethodCategoryNode
 	instanceVariableNames: 'categoryName classOrganizer linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -278,7 +318,7 @@ MethodCategoryNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #NullNode category: 'TestLint-Model'!
-Node subclass: #NullNode
+TestLintNode subclass: #NullNode
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -288,7 +328,7 @@ NullNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestClassNode category: 'TestLint-Model'!
-Node subclass: #TestClassNode
+TestLintNode subclass: #TestClassNode
 	instanceVariableNames: 'linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -298,7 +338,7 @@ TestClassNode class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestMethodNode category: 'TestLint-Model'!
-Node subclass: #TestMethodNode
+TestLintNode subclass: #TestMethodNode
 	instanceVariableNames: 'compiledMethod'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -307,18 +347,18 @@ Node subclass: #TestMethodNode
 TestMethodNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #Rule category: 'TestLint-Model'!
-Object subclass: #Rule
+!classDefinition: #TestLintRule category: 'TestLint-Model'!
+Object subclass: #TestLintRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'Rule class' category: 'TestLint-Model'!
-Rule class
+!classDefinition: 'TestLintRule class' category: 'TestLint-Model'!
+TestLintRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #ClassRule category: 'TestLint-Model'!
-Rule subclass: #ClassRule
+TestLintRule subclass: #ClassRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -348,7 +388,7 @@ UnusedSharedFixtureVariablesRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodCategoryRule category: 'TestLint-Model'!
-Rule subclass: #MethodCategoryRule
+TestLintRule subclass: #MethodCategoryRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -378,7 +418,7 @@ TestMethodCategoryNameRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MethodRule category: 'TestLint-Model'!
-Rule subclass: #MethodRule
+TestLintRule subclass: #MethodRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -487,46 +527,6 @@ MethodRule subclass: #WrongAssertUsageTestRule
 WrongAssertUsageTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLint category: 'TestLint-Model'!
-Object subclass: #TestLint
-	instanceVariableNames: 'rules ruleCollection expectedFailures node notExpectedTestSmells notSatisfiedExpectations'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TestLint-Model'!
-!classDefinition: 'TestLint class' category: 'TestLint-Model'!
-TestLint class
-	instanceVariableNames: ''!
-
-!classDefinition: #TestLintFailure category: 'TestLint-Model'!
-Object subclass: #TestLintFailure
-	instanceVariableNames: 'node ruleClass'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TestLint-Model'!
-!classDefinition: 'TestLintFailure class' category: 'TestLint-Model'!
-TestLintFailure class
-	instanceVariableNames: ''!
-
-!classDefinition: #MissingTestSmell category: 'TestLint-Model'!
-TestLintFailure subclass: #MissingTestSmell
-	instanceVariableNames: 'description'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TestLint-Model'!
-!classDefinition: 'MissingTestSmell class' category: 'TestLint-Model'!
-MissingTestSmell class
-	instanceVariableNames: ''!
-
-!classDefinition: #TestSmell category: 'TestLint-Model'!
-TestLintFailure subclass: #TestSmell
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TestLint-Model'!
-!classDefinition: 'TestSmell class' category: 'TestLint-Model'!
-TestSmell class
-	instanceVariableNames: ''!
-
 
 !TestLintResultWindow commentStamp: '<historical>' prior: 0!
 I am a specialized window that shows the results of the TestLint run.!
@@ -553,7 +553,7 @@ I model the lack of an expected flaw in a Node.!
 !TestSmell commentStamp: '<historical>' prior: 0!
 I model a flaw in the design or code of a Node.!
 
-!Node methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:02:25'!
+!TestLintNode methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:02:25'!
 name
 
 	self subclassResponsibility ! !
@@ -1580,10 +1580,10 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testunclassified for: UnclassifiedMethodCategoryRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testunclassified for: AssertionlessTestRule because: 'Testing purpose')! !
 
-!UnusedSharedFixtureVariablesRuleTest methodsFor: 'initialization' stamp: 'FL 10/9/2022 19:11:50'!
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'initialization' stamp: 'FL 10/23/2022 15:16:49'!
 setUp
 
-	unused := Object new.! !
+	notUsedInTest := Object new.! !
 
 !UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 19:08:07'!
 classWithInstanceVariableNotUsedInTest
@@ -1595,10 +1595,10 @@ classWithInstanceVariablesThatAreUsed
 	
 	^Smalltalk classNamed: 'TestLintTest'! !
 
-!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 18:30:24'!
+!UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/23/2022 15:17:08'!
 classWithUnusedInstanceVariable
 	
-	^Smalltalk classNamed: 'MaxInstanceVariablesRuleTest'! !
+	^Smalltalk classNamed: 'UnusedSharedFixtureVariablesRuleTest'! !
 
 !UnusedSharedFixtureVariablesRuleTest methodsFor: 'test objects' stamp: 'FL 10/9/2022 18:27:12'!
 classWithoutInstanceVariables
@@ -1897,6 +1897,13 @@ hasExpectedTestSmells
 	linkedClass compiledMethodAt: #expectedTestSmells ifAbsent: [^false].
 	^true! !
 
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/23/2022 15:53:55'!
+notSelectedTestLintFailureMessage
+
+	self hasTestLintFailure ifFalse: [^'Congratulations!! No Test Lint failures detected.'].
+
+	^ ''! !
+
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:55'!
 selectedNode
 
@@ -1917,10 +1924,10 @@ selectedNodeName
 
 	^nodesNamesList at: nodesNamesListIndex.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:53:31'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/23/2022 15:44:38'!
 selectedNodeTestLintFailures
 
-	nodesNamesListIndex = 0 ifTrue: [^OrderedCollection new].
+	self isNodeSelected ifFalse: [^OrderedCollection new].
 	^nodesTestLintFailuresDiccionary at: self selectedNodeName.! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/4/2022 16:48:24'!
@@ -1933,10 +1940,10 @@ selectedNodeTestSmellsTitles
 
 	^self getTitlesOf: self selectedNodeTestSmells.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 8/24/2022 21:52:38'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 10/23/2022 15:51:08'!
 selectedTestLintFailureDetail
 
-	(nodesNamesListIndex = 0 or: [nodesTestLintFailuresDiccionaryIndex = 0]) ifTrue: [^''].
+	self isTestLintFailureSelected ifFalse: [^self notSelectedTestLintFailureMessage].
 	^((nodesTestLintFailuresDiccionary at: self selectedNodeName) at: nodesTestLintFailuresDiccionaryIndex) message ! !
 
 !TestLintResultModel methodsFor: 'accessing' stamp: 'FL 10/4/2022 16:43:33'!
@@ -1963,6 +1970,21 @@ nodesNamesListIndex
 nodesTestLintFailuresDiccionaryIndex
 
 	^nodesTestLintFailuresDiccionaryIndex ! !
+
+!TestLintResultModel methodsFor: 'testing' stamp: 'FL 10/23/2022 15:53:13'!
+hasTestLintFailure
+
+	^nodesNamesList isEmpty not! !
+
+!TestLintResultModel methodsFor: 'testing' stamp: 'FL 10/23/2022 15:44:04'!
+isNodeSelected
+
+	^nodesNamesListIndex ~= 0! !
+
+!TestLintResultModel methodsFor: 'testing' stamp: 'FL 10/23/2022 15:48:21'!
+isTestLintFailureSelected
+
+	^self isNodeSelected and: [nodesTestLintFailuresDiccionaryIndex ~= 0]! !
 
 !TestLintResultModel class methodsFor: 'instance creation' stamp: 'FL 9/19/2022 22:39:38'!
 for: aTestLintFailureCollection ofClass: aClass  
@@ -2140,21 +2162,183 @@ in: aSymbol for: aRuleClass because: aDescription
 	
 	^self new initializeIn: aSymbol for: aRuleClass because: aDescription ! !
 
-!Node methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:19:46'!
+!TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
+initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
+	
+	rules := aRuleCollection.
+	expectedFailures := anExpectedFailuresCollection.
+	node := aNode.! !
+
+!TestLint methodsFor: 'testing' stamp: 'FL 6/4/2022 17:47:39'!
+hasRule: aRuleClass 
+	^rules anySatisfy: [:rule | rule class = aRuleClass]! !
+
+!TestLint methodsFor: 'converting' stamp: 'FL 6/23/2022 19:45:22'!
+convertToMissingTestSmells: notSatisfiedExpectationsCollection
+
+	^ notSatisfiedExpectationsCollection collect: [:anExpectedTestSmell |
+		 anExpectedTestSmell asMissingTestSmell]! !
+
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:19'!
+checkExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells 
+	
+	self getNotExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells.
+	
+	^notExpectedTestSmells , (self convertToMissingTestSmells: notSatisfiedExpectations) ! !
+
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:30'!
+getNotExpectedFailures: aCollectionOfExpectedTestSmells over: aCollectionOfTestSmells 
+	
+	|  satisfiedExpectations  |
+	
+	notExpectedTestSmells := OrderedCollection new.
+	satisfiedExpectations := OrderedCollection new.
+	aCollectionOfTestSmells do: [:testSmell || expected |
+		expected := false.
+		aCollectionOfExpectedTestSmells do: [:anExpectedFailure |
+			(anExpectedFailure expects: testSmell) ifTrue: [
+				satisfiedExpectations add: anExpectedFailure.
+				expected := true.
+				]
+			].
+		expected ifFalse: [
+			notExpectedTestSmells add: testSmell 
+			].
+		].
+	notSatisfiedExpectations := self selectSatisfiedExpectations: satisfiedExpectations from: aCollectionOfExpectedTestSmells.! !
+
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:20:39'!
+run
+	| expectedTestSmellsOfRunRules effectiveExpectedTestSmells |
+	expectedTestSmellsOfRunRules := self selectExpectedTestSmellsOfRunRules: expectedFailures.
+	effectiveExpectedTestSmells := self selectExpectedTestSmells: expectedTestSmellsOfRunRules ofRunNode: node.
+	^self checkExpectedFailures: effectiveExpectedTestSmells over: (self runNode)! !
+
+!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:21:36'!
+runNode
+
+	^ rules collect: [:rule | rule runNode: node] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
+
+!TestLint methodsFor: 'select' stamp: 'FL 6/10/2022 09:05:50'!
+selectExpectedTestSmells: anExpectedTestSmellCollection ofRunNode: aNode
+
+	^anExpectedTestSmellCollection select: [:anExpectedTestSmell | aNode contains: anExpectedTestSmell node].! !
+
+!TestLint methodsFor: 'select' stamp: 'FL 6/4/2022 19:19:08'!
+selectExpectedTestSmellsOfRunRules: anExpectedTestSmellCollection
+	^anExpectedTestSmellCollection select: [:anExpectedTestSmell | 
+		self hasRule: anExpectedTestSmell ruleClass]! !
+
+!TestLint methodsFor: 'select' stamp: 'FL 6/5/2022 15:54:44'!
+selectSatisfiedExpectations: aSubcollectionOfExpectedTestSmells from: aCollectionOfExpectedTestSmells
+
+	^ aCollectionOfExpectedTestSmells select: [:anExpectedFailure | 
+		(aSubcollectionOfExpectedTestSmells includes: anExpectedFailure) not]! !
+
+!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:31'!
+withRules: aRuleCollection andExpectedTestSmells: anExpectedFailureCollection forNode: aNode
+	
+	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailureCollection forNode: aNode! !
+
+!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:53'!
+withRules: aRuleCollection forNode: aNode
+	
+	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: Array new forNode: aNode! !
+
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 6/4/2022 16:08:40'!
+message
+
+	^self subclassResponsibility ! !
+
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/21/2022 15:56:12'!
+node
+	^node! !
+
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:54:29'!
+ruleClass
+	
+	^ruleClass! !
+
+!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:05:00'!
+title
+
+	self subclassResponsibility ! !
+
+!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:41'!
+isMissingTestSmell
+
+	^false! !
+
+!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:45'!
+isTestSmell
+
+	^false! !
+
+!MissingTestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:55:09'!
+initializeWithNode: aNode andRuleClass: aRuleClass because: aDescription  
+	
+	node := aNode.
+	ruleClass := aRuleClass.
+	description := aDescription.! !
+
+!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:52:24'!
+message
+	^description.! !
+
+!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:54:29'!
+title
+	^ruleClass title, ' (EXPECTED)'.! !
+
+!MissingTestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:14'!
+isMissingTestSmell
+
+	^true! !
+
+!MissingTestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:59:37'!
+withNode: aNode andRuleClass: aRuleClass because: aDescription  
+	
+	^self new initializeWithNode: aNode andRuleClass: aRuleClass  because: aDescription ! !
+
+!TestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:56:58'!
+initializeWithNode: aNode andRuleClass: aRuleClass   
+	
+	node := aNode.
+	ruleClass := aRuleClass.! !
+
+!TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:38'!
+message
+
+	^ruleClass description.! !
+
+!TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:41'!
+title
+	^ruleClass title! !
+
+!TestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:01'!
+isTestSmell
+
+	^true! !
+
+!TestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:58:07'!
+withNode: aNode andRuleClass: aRuleClass   
+	
+	^self new initializeWithNode: aNode andRuleClass: aRuleClass ! !
+
+!TestLintNode methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:19:46'!
 applyRule: aRule 
 	^self subclassResponsibility.! !
 
-!Node methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:23:30'!
+!TestLintNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:23:30'!
 browse: model
 
 	self subclassResponsibility ! !
 
-!Node methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
+!TestLintNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
 linkedClass
 
 	self subclassResponsibility ! !
 
-!Node methodsFor: 'testing' stamp: 'FL 6/10/2022 09:06:32'!
+!TestLintNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:06:32'!
 contains: aNode 
 	self subclassResponsibility.! !
 
@@ -2323,59 +2507,59 @@ errorNotATestMethod
 
 	^ self error: self notATestMethodErrorDescription ! !
 
-!Rule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
+!TestLintRule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
 isViolatedBy: aNode 
 
 	^self subclassResponsibility ! !
 
-!Rule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
+!TestLintRule methodsFor: 'execution' stamp: 'FL 5/29/2022 16:17:00'!
 runForReal: aNode
 
 	^ (self isViolatedBy: aNode) ifTrue: [self testSmell: aNode ] ifFalse: [self noTestSmell]! !
 
-!Rule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:38:17'!
+!TestLintRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:38:17'!
 over: aNodeList runAndJoin: aBlock
 
 	^ aNodeList collect: [ :aNode |
 		aBlock value: aNode] andFold: [:a :b | a,b] ifEmpty: [self noTestSmell]! !
 
-!Rule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:42:30'!
+!TestLintRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:42:30'!
 runClass: aTestClassNode 
 	^self over: aTestClassNode methodCategoryNodeList runAndJoin: [ :methodCategoryNode |
 		self runMethodCategory: methodCategoryNode].! !
 
-!Rule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:44:11'!
+!TestLintRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:44:11'!
 runMethod: aTestMethodNode 
 	^self noTestSmell ! !
 
-!Rule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:43:43'!
+!TestLintRule methodsFor: 'evaluating' stamp: 'FL 5/29/2022 15:43:43'!
 runMethodCategory: aMethodCategoryNode 
 
 	^self over: aMethodCategoryNode testMethodsNodeList runAndJoin: [ :testMethodNode |
 		self runMethod: testMethodNode]! !
 
-!Rule methodsFor: 'evaluating' stamp: 'FL 4/10/2022 19:35:35'!
+!TestLintRule methodsFor: 'evaluating' stamp: 'FL 4/10/2022 19:35:35'!
 runNode: aNode 
 	^aNode applyRule: self! !
 
-!Rule methodsFor: 'test smell' stamp: 'FL 5/15/2022 18:54:01'!
+!TestLintRule methodsFor: 'test smell' stamp: 'FL 5/15/2022 18:54:01'!
 noTestSmell
 	^OrderedCollection new.! !
 
-!Rule methodsFor: 'test smell' stamp: 'FL 9/1/2022 19:58:25'!
+!TestLintRule methodsFor: 'test smell' stamp: 'FL 9/1/2022 19:58:25'!
 testSmell: aNode 
 	^OrderedCollection with: (TestSmell withNode: aNode andRuleClass: self class).! !
 
-!Rule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
+!TestLintRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
 description
 	self subclassResponsibility ! !
 
-!Rule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:07:30'!
+!TestLintRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:07:30'!
 title
 
 	self subclassResponsibility ! !
 
-!Rule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:07:41'!
+!TestLintRule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:07:41'!
 newWithDefaults
 
 	^self new! !
@@ -2426,10 +2610,10 @@ errorInvalidThreshold
 validThreshold: aThreshold 
 	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
 
-!UnusedSharedFixtureVariablesRule methodsFor: 'evaluating' stamp: 'FL 10/9/2022 19:37:37'!
+!UnusedSharedFixtureVariablesRule methodsFor: 'evaluating' stamp: 'FL 10/23/2022 15:19:59'!
 isInstanceVariable: anInstanceVariableName usedInClass: aClass
 
-	^(aClass whichSelectorsAccess: anInstanceVariableName) anySatisfy: [ :aSelector | self isTest: aSelector ].! !
+	^(aClass whichSelectorsAccess: anInstanceVariableName) anySatisfy: [ :aSelector | aSelector isTestSelector ].! !
 
 !UnusedSharedFixtureVariablesRule methodsFor: 'execution' stamp: 'FL 10/9/2022 19:24:12'!
 isViolatedBy: aTestClassNode
@@ -2440,11 +2624,6 @@ isViolatedBy: aTestClassNode
 	instanceVariables do: [ :instVarName | (self isInstanceVariable: instVarName usedInClass: nodeLinkedClass) ifFalse: [
 			^true]].
 	^false! !
-
-!UnusedSharedFixtureVariablesRule methodsFor: 'testing' stamp: 'FL 10/9/2022 19:33:24'!
-isTest: aSelector
-
-	^ (aSelector beginsWith: 'test') and: [ aSelector numArgs = 0 ]! !
 
 !UnusedSharedFixtureVariablesRule class methodsFor: 'message' stamp: 'FL 10/9/2022 19:03:17'!
 description
@@ -2654,15 +2833,23 @@ errorInvalidThreshold
 
 	^ self error: self invalidThresholdDescription! !
 
-!MagicLiteralsTestRule methodsFor: 'execution' stamp: 'FL 8/14/2022 19:02:44'!
+!MagicLiteralsTestRule methodsFor: 'execution' stamp: 'FL 10/23/2022 15:30:46'!
 isViolatedBy: aTestMethodNode 
 	
-	| magicLiteralsAmount |
-	magicLiteralsAmount := 0.
-	aTestMethodNode methodNode accept: (ParseNodeEnumerator ofBlock: [:node | (self isMagicLiteral: node) ifTrue: [magicLiteralsAmount := magicLiteralsAmount + 1]
-		]).
-	
-	^magicLiteralsAmount > threshold ! !
+	^(self numberOfLiteralsOf: aTestMethodNode) > threshold ! !
+
+!MagicLiteralsTestRule methodsFor: 'execution' stamp: 'FL 10/23/2022 15:29:25'!
+numberOfLiteralsOf: aTestMethodNode
+
+   | magicLiteralsAmount literalsCounter |
+
+   magicLiteralsAmount := 0.
+   literalsCounter := ParseNodeEnumerator ofBlock: [:node |
+       (self isMagicLiteral: node) ifTrue: [magicLiteralsAmount := magicLiteralsAmount + 1]].
+
+   aTestMethodNode methodNode accept: literalsCounter.
+
+   ^magicLiteralsAmount ! !
 
 !MagicLiteralsTestRule methodsFor: 'testing' stamp: 'FL 8/14/2022 18:43:52'!
 isMagicLiteral: aNode 
@@ -2685,10 +2872,10 @@ description
 title
 	^'Magic Literals'! !
 
-!MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 9/28/2022 19:10:11'!
+!MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 10/23/2022 15:32:25'!
 newWithDefaults
 
-	^self withThreshold: 5! !
+	^self withThreshold: 10! !
 
 !MagicLiteralsTestRule class methodsFor: 'instance creation' stamp: 'FL 8/14/2022 18:50:14'!
 withThreshold: aThreshold 
@@ -2820,15 +3007,10 @@ isViolatedBy: aTestMethodNode
 isSelfOrSuperPseudoVariable: aLiteralVariableNode 
 	^aLiteralVariableNode isSelfPseudoVariable or: [aLiteralVariableNode isSuperPseudoVariable ]! !
 
-!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/10/2022 16:09:26'!
+!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/23/2022 15:19:00'!
 isTestMessageNode: aNode 
 	
-	^aNode isMessageNode and: [self isSelfOrSuperPseudoVariable: aNode receiverOrCascadeReceiver] and: [self isTestSelectorSymbol: aNode selectorSymbol]! !
-
-!UnusualTestOrderRule methodsFor: 'testing' stamp: 'FL 10/10/2022 15:56:18'!
-isTestSelectorSymbol: aSelector
-	
-	^(aSelector beginsWith: 'test') and: [ aSelector numArgs = 0 ]! !
+	^aNode isMessageNode and: [self isSelfOrSuperPseudoVariable: aNode receiverOrCascadeReceiver] and: [aNode selectorSymbol isTestSelector]! !
 
 !UnusualTestOrderRule class methodsFor: 'message' stamp: 'FL 10/10/2022 15:57:09'!
 description
@@ -2868,168 +3050,6 @@ description
 !WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:52'!
 title
 	^'Wrong Assert Usage'! !
-
-!TestLint methodsFor: 'initialization' stamp: 'FL 6/19/2022 16:56:19'!
-initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailuresCollection forNode: aNode 
-	
-	rules := aRuleCollection.
-	expectedFailures := anExpectedFailuresCollection.
-	node := aNode.! !
-
-!TestLint methodsFor: 'testing' stamp: 'FL 6/4/2022 17:47:39'!
-hasRule: aRuleClass 
-	^rules anySatisfy: [:rule | rule class = aRuleClass]! !
-
-!TestLint methodsFor: 'converting' stamp: 'FL 6/23/2022 19:45:22'!
-convertToMissingTestSmells: notSatisfiedExpectationsCollection
-
-	^ notSatisfiedExpectationsCollection collect: [:anExpectedTestSmell |
-		 anExpectedTestSmell asMissingTestSmell]! !
-
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:19'!
-checkExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells 
-	
-	self getNotExpectedFailures: anExpectedFailureCollection over: aCollectionOfTestSmells.
-	
-	^notExpectedTestSmells , (self convertToMissingTestSmells: notSatisfiedExpectations) ! !
-
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/23/2022 19:43:30'!
-getNotExpectedFailures: aCollectionOfExpectedTestSmells over: aCollectionOfTestSmells 
-	
-	|  satisfiedExpectations  |
-	
-	notExpectedTestSmells := OrderedCollection new.
-	satisfiedExpectations := OrderedCollection new.
-	aCollectionOfTestSmells do: [:testSmell || expected |
-		expected := false.
-		aCollectionOfExpectedTestSmells do: [:anExpectedFailure |
-			(anExpectedFailure expects: testSmell) ifTrue: [
-				satisfiedExpectations add: anExpectedFailure.
-				expected := true.
-				]
-			].
-		expected ifFalse: [
-			notExpectedTestSmells add: testSmell 
-			].
-		].
-	notSatisfiedExpectations := self selectSatisfiedExpectations: satisfiedExpectations from: aCollectionOfExpectedTestSmells.! !
-
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:20:39'!
-run
-	| expectedTestSmellsOfRunRules effectiveExpectedTestSmells |
-	expectedTestSmellsOfRunRules := self selectExpectedTestSmellsOfRunRules: expectedFailures.
-	effectiveExpectedTestSmells := self selectExpectedTestSmells: expectedTestSmellsOfRunRules ofRunNode: node.
-	^self checkExpectedFailures: effectiveExpectedTestSmells over: (self runNode)! !
-
-!TestLint methodsFor: 'evaluating' stamp: 'FL 6/19/2022 17:21:36'!
-runNode
-
-	^ rules collect: [:rule | rule runNode: node] andFold: [:a :b | a,b] ifEmpty: [Array new].! !
-
-!TestLint methodsFor: 'select' stamp: 'FL 6/10/2022 09:05:50'!
-selectExpectedTestSmells: anExpectedTestSmellCollection ofRunNode: aNode
-
-	^anExpectedTestSmellCollection select: [:anExpectedTestSmell | aNode contains: anExpectedTestSmell node].! !
-
-!TestLint methodsFor: 'select' stamp: 'FL 6/4/2022 19:19:08'!
-selectExpectedTestSmellsOfRunRules: anExpectedTestSmellCollection
-	^anExpectedTestSmellCollection select: [:anExpectedTestSmell | 
-		self hasRule: anExpectedTestSmell ruleClass]! !
-
-!TestLint methodsFor: 'select' stamp: 'FL 6/5/2022 15:54:44'!
-selectSatisfiedExpectations: aSubcollectionOfExpectedTestSmells from: aCollectionOfExpectedTestSmells
-
-	^ aCollectionOfExpectedTestSmells select: [:anExpectedFailure | 
-		(aSubcollectionOfExpectedTestSmells includes: anExpectedFailure) not]! !
-
-!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:31'!
-withRules: aRuleCollection andExpectedTestSmells: anExpectedFailureCollection forNode: aNode
-	
-	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: anExpectedFailureCollection forNode: aNode! !
-
-!TestLint class methodsFor: 'instance creation' stamp: 'FL 6/19/2022 16:50:53'!
-withRules: aRuleCollection forNode: aNode
-	
-	^self new initializeWithRules: aRuleCollection withExpectedTestSmells: Array new forNode: aNode! !
-
-!TestLintFailure methodsFor: 'accessing' stamp: 'FL 6/4/2022 16:08:40'!
-message
-
-	^self subclassResponsibility ! !
-
-!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/21/2022 15:56:12'!
-node
-	^node! !
-
-!TestLintFailure methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:54:29'!
-ruleClass
-	
-	^ruleClass! !
-
-!TestLintFailure methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:05:00'!
-title
-
-	self subclassResponsibility ! !
-
-!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:41'!
-isMissingTestSmell
-
-	^false! !
-
-!TestLintFailure methodsFor: 'testing' stamp: 'FL 10/4/2022 16:41:45'!
-isTestSmell
-
-	^false! !
-
-!MissingTestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:55:09'!
-initializeWithNode: aNode andRuleClass: aRuleClass because: aDescription  
-	
-	node := aNode.
-	ruleClass := aRuleClass.
-	description := aDescription.! !
-
-!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 8/31/2022 19:52:24'!
-message
-	^description.! !
-
-!MissingTestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:54:29'!
-title
-	^ruleClass title, ' (EXPECTED)'.! !
-
-!MissingTestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:14'!
-isMissingTestSmell
-
-	^true! !
-
-!MissingTestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:59:37'!
-withNode: aNode andRuleClass: aRuleClass because: aDescription  
-	
-	^self new initializeWithNode: aNode andRuleClass: aRuleClass  because: aDescription ! !
-
-!TestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:56:58'!
-initializeWithNode: aNode andRuleClass: aRuleClass   
-	
-	node := aNode.
-	ruleClass := aRuleClass.! !
-
-!TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:38'!
-message
-
-	^ruleClass description.! !
-
-!TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:41'!
-title
-	^ruleClass title! !
-
-!TestSmell methodsFor: 'testing' stamp: 'FL 10/4/2022 16:42:01'!
-isTestSmell
-
-	^true! !
-
-!TestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:58:07'!
-withNode: aNode andRuleClass: aRuleClass   
-	
-	^self new initializeWithNode: aNode andRuleClass: aRuleClass ! !
 
 !Browser methodsFor: '*TestLint' stamp: 'FL 5/29/2022 14:51:54'!
 runTestLintOverClass
