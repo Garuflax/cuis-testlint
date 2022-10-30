@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5495] on 23 October 2022 at 3:57:15 pm'!
+'From Cuis 6.0 [latest update: #5510] on 30 October 2022 at 4:14:29 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 30!
+!provides: 'TestLint' 1 31!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -105,6 +105,16 @@ TestCase subclass: #ProperOrganizationTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'ProperOrganizationTestRuleTest class' category: 'TestLint-Tests'!
 ProperOrganizationTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #TeardownOnlyRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #TeardownOnlyRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'TeardownOnlyRuleTest class' category: 'TestLint-Tests'!
+TeardownOnlyRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestClassNodeTest category: 'TestLint-Tests'!
@@ -377,6 +387,16 @@ ClassRule subclass: #MaxInstanceVariablesRule
 MaxInstanceVariablesRule class
 	instanceVariableNames: ''!
 
+!classDefinition: #TeardownOnlyRule category: 'TestLint-Model'!
+ClassRule subclass: #TeardownOnlyRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TeardownOnlyRule class' category: 'TestLint-Model'!
+TeardownOnlyRule class
+	instanceVariableNames: ''!
+
 !classDefinition: #UnusedSharedFixtureVariablesRule category: 'TestLint-Model'!
 ClassRule subclass: #UnusedSharedFixtureVariablesRule
 	instanceVariableNames: ''
@@ -552,28 +572,6 @@ I model the lack of an expected flaw in a Node.!
 
 !TestSmell commentStamp: '<historical>' prior: 0!
 I model a flaw in the design or code of a Node.!
-
-!TestLintNode methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:02:25'!
-name
-
-	self subclassResponsibility ! !
-
-!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 18:43:45'!
-name
-
-	^categoryName! !
-
-!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/8/2022 19:41:20'!
-name
-	^linkedClass name ! !
-
-!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/1/2022 15:41:03'!
-linesOfCode
-	^compiledMethod sourceCode lineCount! !
-
-!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:03:39'!
-name
-	^compiledMethod selector asString! !
 
 !TestLintResultWindow methodsFor: 'GUI building' stamp: 'FL 9/8/2022 21:41:44'!
 browseButton
@@ -1210,10 +1208,60 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule for: ProperOrganizationTestRule because: 'Testing purpose')! !
 
+!TeardownOnlyRuleTest methodsFor: 'tests' stamp: 'FL 10/30/2022 15:28:57'!
+test01ClassWithoutSetupAndTeardownDoesNotViolateRule
+
+    | aTeardownOnlyRule result |
+    aTeardownOnlyRule := TeardownOnlyRule new.
+    
+    result := aTeardownOnlyRule runClass: (TestClassNode for: self classWithoutSetupAndTeardown).
+    
+    self assert: result isEmpty.! !
+
+!TeardownOnlyRuleTest methodsFor: 'tests' stamp: 'FL 10/30/2022 15:39:07'!
+test02ClassWithTeardownViolatesRule
+
+    | aTeardownOnlyRule aTestClassNode result |
+    aTeardownOnlyRule := TeardownOnlyRule new.
+    aTestClassNode := TestClassNode for: self classWithTeardown.
+    
+    result := aTeardownOnlyRule runClass: aTestClassNode.
+    
+    self assert: 1 equals: result size.
+    self assert: (TestSmell withNode: aTestClassNode andRuleClass: aTeardownOnlyRule class) message equals: result first message.! !
+
+!TeardownOnlyRuleTest methodsFor: 'tests' stamp: 'FL 10/30/2022 16:06:27'!
+test03ClassWithSetupAndTeardownDoesNotViolateRule
+
+    | aTeardownOnlyRule result |
+    aTeardownOnlyRule := TeardownOnlyRule new.
+    
+    result := aTeardownOnlyRule runClass: (TestClassNode for: self classWithSetupAndTeardown).
+    
+    self assert: result isEmpty.! !
+
+!TeardownOnlyRuleTest methodsFor: 'test objects' stamp: 'FL 10/30/2022 16:05:54'!
+classWithSetupAndTeardown
+	^Smalltalk classNamed: 'TestLintTest'! !
+
+!TeardownOnlyRuleTest methodsFor: 'test objects' stamp: 'FL 10/30/2022 15:37:10'!
+classWithTeardown
+	^Smalltalk classNamed: 'TeardownOnlyRuleTest'! !
+
+!TeardownOnlyRuleTest methodsFor: 'test objects' stamp: 'FL 10/30/2022 15:28:30'!
+classWithoutSetupAndTeardown
+	^Smalltalk classNamed: 'AnonymousTestRuleTest'! !
+
+!TeardownOnlyRuleTest methodsFor: 'finalization' stamp: 'FL 10/30/2022 15:36:44'!
+tearDown! !
+
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
 
 	self should: [TestClassNode for: (Smalltalk classNamed: 'TestClassNode')] raise: Error withMessageText: TestClassNode notATestClassErrorDescription.! !
+
+!TestLintTest methodsFor: 'finalization' stamp: 'FL 10/30/2022 16:04:30'!
+tearDown! !
 
 !TestLintTest methodsFor: 'tests' stamp: 'FL 6/19/2022 16:51:50'!
 test01RunWithoutRulesFinishesFine
@@ -2324,6 +2372,16 @@ withNode: aNode andRuleClass: aRuleClass
 	
 	^self new initializeWithNode: aNode andRuleClass: aRuleClass ! !
 
+!TestLintNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
+linkedClass
+
+	self subclassResponsibility ! !
+
+!TestLintNode methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:02:25'!
+name
+
+	self subclassResponsibility ! !
+
 !TestLintNode methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:19:46'!
 applyRule: aRule 
 	^self subclassResponsibility.! !
@@ -2333,30 +2391,9 @@ browse: model
 
 	self subclassResponsibility ! !
 
-!TestLintNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
-linkedClass
-
-	self subclassResponsibility ! !
-
 !TestLintNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:06:32'!
 contains: aNode 
 	self subclassResponsibility.! !
-
-!MethodCategoryNode methodsFor: 'initialization' stamp: 'FL 6/5/2022 14:53:51'!
-initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer 
-	
-	categoryName := aCategoryName.
-	linkedClass := aClass.
-	classOrganizer := aClassOrganizer.! !
-
-!MethodCategoryNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:25:16'!
-browse: model
-
-	^model browseMethodCategoryNode: self! !
-
-!MethodCategoryNode methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:30:47'!
-applyRule: aRule 
-	^aRule runMethodCategory: self.! !
 
 !MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 14:56:16'!
 categoryName
@@ -2374,9 +2411,30 @@ linkedClass
 	
 	^linkedClass! !
 
+!MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 18:43:45'!
+name
+
+	^categoryName! !
+
 !MethodCategoryNode methodsFor: 'accessing' stamp: 'FL 5/25/2022 19:14:47'!
 testMethodsNodeList
 	^(self compiledMethodsList select: [ :compiledMethod | compiledMethod isTestMethod ]) collect: [ :compiledMethod | TestMethodNode for: compiledMethod ].! !
+
+!MethodCategoryNode methodsFor: 'initialization' stamp: 'FL 6/5/2022 14:53:51'!
+initializeFor: aCategoryName of: aClass categorizedWith: aClassOrganizer 
+	
+	categoryName := aCategoryName.
+	linkedClass := aClass.
+	classOrganizer := aClassOrganizer.! !
+
+!MethodCategoryNode methodsFor: 'GUI' stamp: 'FL 9/14/2022 19:25:16'!
+browse: model
+
+	^model browseMethodCategoryNode: self! !
+
+!MethodCategoryNode methodsFor: 'evaluating' stamp: 'FL 5/8/2022 16:30:47'!
+applyRule: aRule 
+	^aRule runMethodCategory: self.! !
 
 !MethodCategoryNode methodsFor: 'comparing' stamp: 'FL 6/5/2022 14:55:05'!
 = other
@@ -2397,6 +2455,18 @@ browse: model
 
 	! !
 
+!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:26'!
+linkedClass
+	^linkedClass! !
+
+!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 14:53:41'!
+methodCategoryNodeList
+	^linkedClass methodCategories collect: [ :methodCategorySymbol | MethodCategoryNode for: methodCategorySymbol asString of: linkedClass categorizedWith: linkedClass organization ].! !
+
+!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/8/2022 19:41:20'!
+name
+	^linkedClass name ! !
+
 !TestClassNode methodsFor: 'initialization' stamp: 'FL 6/5/2022 14:53:41'!
 initializeFor: aClass 
 
@@ -2405,14 +2475,6 @@ initializeFor: aClass
 !TestClassNode methodsFor: 'evaluating' stamp: 'FL 5/26/2022 19:55:15'!
 applyRule: aRule 
 	^aRule runClass: self.! !
-
-!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:26'!
-linkedClass
-	^linkedClass! !
-
-!TestClassNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 14:53:41'!
-methodCategoryNodeList
-	^linkedClass methodCategories collect: [ :methodCategorySymbol | MethodCategoryNode for: methodCategorySymbol asString of: linkedClass categorizedWith: linkedClass organization ].! !
 
 !TestClassNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:12:25'!
 contains: aNode 
@@ -2450,6 +2512,27 @@ isTestClass: aClass
 
 	! !
 
+!TestMethodNode methodsFor: 'accessing' stamp: 'FL 6/4/2022 18:22:07'!
+compiledMethod
+	
+	^compiledMethod! !
+
+!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/1/2022 15:41:03'!
+linesOfCode
+	^compiledMethod sourceCode lineCount! !
+
+!TestMethodNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:43:47'!
+linkedClass
+	^compiledMethod methodClass! !
+
+!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/6/2022 08:46:21'!
+methodNode
+	^compiledMethod methodNode ! !
+
+!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/15/2022 19:03:39'!
+name
+	^compiledMethod selector asString! !
+
 !TestMethodNode methodsFor: 'initialization' stamp: 'FL 4/10/2022 16:49:23'!
 initializeFor: aCompiledMethod 
 	
@@ -2463,19 +2546,6 @@ applyRule: aRule
 = other
 
 	^self class = other class and: [compiledMethod selector = other compiledMethod selector].! !
-
-!TestMethodNode methodsFor: 'accessing' stamp: 'FL 6/4/2022 18:22:07'!
-compiledMethod
-	
-	^compiledMethod! !
-
-!TestMethodNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:43:47'!
-linkedClass
-	^compiledMethod methodClass! !
-
-!TestMethodNode methodsFor: 'accessing' stamp: 'FL 5/6/2022 08:46:21'!
-methodNode
-	^compiledMethod methodNode ! !
 
 !TestMethodNode methodsFor: 'testing' stamp: 'FL 6/10/2022 09:07:48'!
 contains: aNode 
@@ -2609,6 +2679,26 @@ errorInvalidThreshold
 !MaxInstanceVariablesRule class methodsFor: 'assertions' stamp: 'FL 6/8/2022 19:48:47'!
 validThreshold: aThreshold 
 	^ aThreshold negative ifTrue: [self errorInvalidThreshold]! !
+
+!TeardownOnlyRule methodsFor: 'testing' stamp: 'FL 10/30/2022 16:11:29'!
+class: aClass hasMethod: aSymbol
+
+	aClass compiledMethodAt: aSymbol ifAbsent: [^false].
+	^true! !
+
+!TeardownOnlyRule methodsFor: 'execution' stamp: 'FL 10/30/2022 16:13:38'!
+isViolatedBy: aNode 
+	| linkedClass |
+	linkedClass := aNode linkedClass.
+	^(self class: linkedClass hasMethod: #tearDown) and: [(self class: linkedClass hasMethod: #setUp) not].! !
+
+!TeardownOnlyRule class methodsFor: 'message' stamp: 'FL 10/30/2022 15:45:19'!
+description
+	^'The test-suite is only defining teardown. This is unusual for unit tests.'! !
+
+!TeardownOnlyRule class methodsFor: 'message' stamp: 'FL 10/30/2022 15:46:20'!
+title
+	^'Teardown Only Test-Suite'! !
 
 !UnusedSharedFixtureVariablesRule methodsFor: 'evaluating' stamp: 'FL 10/23/2022 15:19:59'!
 isInstanceVariable: anInstanceVariableName usedInClass: aClass

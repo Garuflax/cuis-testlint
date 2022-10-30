@@ -8,6 +8,7 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 ### Added
 - Rule for detecting test classes that do not use one of its instance variables.
 - Rule for detecting tests that call a test.
+- Rule for detecting tear down only test-suites.
 
 ### Changed
 - Prints message when no test lint failures are detected.
