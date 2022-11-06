@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 30 October 2022 at 4:14:29 pm'!
+'From Cuis 6.0 [latest update: #5510] on 6 November 2022 at 8:07:36 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 31!
+!provides: 'TestLint' 1 32!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -125,6 +125,16 @@ TestCase subclass: #TestClassNodeTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'TestClassNodeTest class' category: 'TestLint-Tests'!
 TestClassNodeTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestLintRulesGetterTest category: 'TestLint-Tests'!
+TestCase subclass: #TestLintRulesGetterTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'TestLintRulesGetterTest class' category: 'TestLint-Tests'!
+TestLintRulesGetterTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLintTest category: 'TestLint-Tests'!
@@ -545,6 +555,16 @@ MethodRule subclass: #WrongAssertUsageTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'WrongAssertUsageTestRule class' category: 'TestLint-Model'!
 WrongAssertUsageTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestLintRulesGetter category: 'TestLint-Model'!
+Object subclass: #TestLintRulesGetter
+	instanceVariableNames: 'testRuleCollection class'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TestLintRulesGetter class' category: 'TestLint-Model'!
+TestLintRulesGetter class
 	instanceVariableNames: ''!
 
 
@@ -1255,10 +1275,62 @@ classWithoutSetupAndTeardown
 !TeardownOnlyRuleTest methodsFor: 'finalization' stamp: 'FL 10/30/2022 15:36:44'!
 tearDown! !
 
+!TeardownOnlyRuleTest methodsFor: 'excepted rules' stamp: 'FL 11/6/2022 19:46:28'!
+exceptedTestLintRules
+
+	^Array with: TeardownOnlyRule.! !
+
 !TestClassNodeTest methodsFor: 'tests' stamp: 'FL 5/29/2022 16:41:18'!
 test01CannotCreateTestClassNodeWithoutATestClass
 
 	self should: [TestClassNode for: (Smalltalk classNamed: 'TestClassNode')] raise: Error withMessageText: TestClassNode notATestClassErrorDescription.! !
+
+!TestLintRulesGetterTest methodsFor: 'assertions' stamp: 'FL 11/6/2022 19:37:32'!
+assertRulesClasses: expectedTestLintRulesClasses matchWith: gottenTestLintRulesInstances
+
+	| gottenTestLintRulesClasses |
+	gottenTestLintRulesClasses := gottenTestLintRulesInstances collect: [:testLintRuleInstance | testLintRuleInstance class].
+	self assert: expectedTestLintRulesClasses equals: gottenTestLintRulesClasses.! !
+
+!TestLintRulesGetterTest methodsFor: 'tests' stamp: 'FL 11/6/2022 19:59:09'!
+test01GetRulesFromEmptyRuleArrayIsEmpty
+
+	| aTestRulesGetter gottenRules |
+	aTestRulesGetter := TestLintRulesGetter from: Array new forClass: self classWithoutExceptedRule.
+	
+	gottenRules := aTestRulesGetter getRules.
+	
+	self assert: gottenRules isEmpty.! !
+
+!TestLintRulesGetterTest methodsFor: 'tests' stamp: 'FL 11/6/2022 19:59:09'!
+test02ClassWithoutExceptedRulesGetsAllDefaultRules
+
+	| aTestRulesGetter gottenRules expectedRules |
+	aTestRulesGetter := TestLintRulesGetter from: (Array with: AnonymousTestRule) forClass: self classWithoutExceptedRule.
+	
+	gottenRules := aTestRulesGetter getRules.
+	
+	expectedRules := Array with: AnonymousTestRule.
+	self assertRulesClasses: expectedRules matchWith: gottenRules ! !
+
+!TestLintRulesGetterTest methodsFor: 'tests' stamp: 'FL 11/6/2022 19:59:09'!
+test03ExeptedRuleIsNotGotten
+
+	| aTestRulesGetter gottenRules expectedRules |
+	aTestRulesGetter := TestLintRulesGetter from: (Array with: TeardownOnlyRule) forClass: self classWithExceptedRule.
+	
+	gottenRules := aTestRulesGetter getRules.
+	
+	expectedRules := Array new.
+	self assertRulesClasses: expectedRules matchWith: gottenRules ! !
+
+!TestLintRulesGetterTest methodsFor: 'test objects' stamp: 'FL 11/6/2022 19:43:24'!
+classWithExceptedRule
+	^TeardownOnlyRuleTest! !
+
+!TestLintRulesGetterTest methodsFor: 'test objects' stamp: 'FL 11/6/2022 19:59:48'!
+classWithoutExceptedRule
+	^TestLintRulesGetterTest ! !
 
 !TestLintTest methodsFor: 'finalization' stamp: 'FL 10/30/2022 16:04:30'!
 tearDown! !
@@ -2039,13 +2111,21 @@ for: aTestLintFailureCollection ofClass: aClass
 	
 	^self new initializeFor: aTestLintFailureCollection ofClass: aClass ! !
 
-!TestLintRunner methodsFor: 'initialization' stamp: 'FL 9/19/2022 22:37:51'!
+!TestLintRunner methodsFor: 'initialization' stamp: 'FL 11/6/2022 20:03:05'!
+getTestRulesOf: aClass
+
+	| aTestLintRulesGetter |
+	aTestLintRulesGetter := TestLintRulesGetter from:  self class testRules forClass: aClass.
+	^ aTestLintRulesGetter getRules.! !
+
+!TestLintRunner methodsFor: 'initialization' stamp: 'FL 11/6/2022 19:05:29'!
 initializeRun: aNode 
 	
-	| testLintFailures expectedTestSmells model linkedClass |
+	| testLintFailures expectedTestSmells model linkedClass rulesToRun |
 	linkedClass _ aNode linkedClass.
 	expectedTestSmells := self getExpectedTestSmellsOf: linkedClass.
-	testLintFailures := (TestLint withRules: (self class testRules) andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
+	rulesToRun := self getTestRulesOf: linkedClass.
+	testLintFailures := (TestLint withRules: rulesToRun andExpectedTestSmells: expectedTestSmells forNode: aNode) run.
 	model := TestLintResultModel for: testLintFailures ofClass: linkedClass.
 	TestLintResultWindow displayTestLintResultFrom: model.! !
 
@@ -2067,10 +2147,10 @@ concreteTestRulesClasses
 
 	^MethodRule subclasses , MethodCategoryRule subclasses , ClassRule subclasses ! !
 
-!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 9/28/2022 19:18:01'!
+!TestLintRunner class methodsFor: 'test rules' stamp: 'FL 11/6/2022 20:01:51'!
 testRules
 
-	^self concreteTestRulesClasses collect: [:class | class newWithDefaults ]! !
+	^self concreteTestRulesClasses! !
 
 !AssertionChecker methodsFor: 'initialization' stamp: 'FL 7/10/2022 21:19:21'!
 initializeFor: aMessageNode ofClass: aClass 
@@ -3140,6 +3220,32 @@ description
 !WrongAssertUsageTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:52'!
 title
 	^'Wrong Assert Usage'! !
+
+!TestLintRulesGetter methodsFor: 'initialization' stamp: 'FL 11/6/2022 19:27:09'!
+initializeFrom: aTestRuleCollection forClass: aClass 
+	
+	testRuleCollection := aTestRuleCollection.
+	class := aClass.! !
+
+!TestLintRulesGetter methodsFor: 'evaluating' stamp: 'FL 11/6/2022 19:53:10'!
+getExceptedTestLintRules
+
+	| exceptedTestLintRulesMethod |
+	exceptedTestLintRulesMethod := class compiledMethodAt: #exceptedTestLintRules ifAbsent: [^#()].
+	^exceptedTestLintRulesMethod valueWithReceiver: nil arguments: #().! !
+
+!TestLintRulesGetter methodsFor: 'evaluating' stamp: 'FL 11/6/2022 19:56:42'!
+getRules
+
+	| exceptedTestLintRules |
+	
+	exceptedTestLintRules := self getExceptedTestLintRules.
+	^(testRuleCollection difference: exceptedTestLintRules) collect: [:testRuleclass | testRuleclass newWithDefaults ].! !
+
+!TestLintRulesGetter class methodsFor: 'instance creation' stamp: 'FL 11/6/2022 19:26:44'!
+from: aTestRuleCollection forClass: aClass 
+	
+	^self new initializeFrom: aTestRuleCollection forClass: aClass ! !
 
 !Browser methodsFor: '*TestLint' stamp: 'FL 5/29/2022 14:51:54'!
 runTestLintOverClass
