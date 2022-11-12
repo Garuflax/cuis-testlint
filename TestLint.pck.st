@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 6 November 2022 at 8:07:36 pm'!
+'From Cuis 6.0 [latest update: #5510] on 12 November 2022 at 4:42:24 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 32!
+!provides: 'TestLint' 1 33!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -35,6 +35,16 @@ TestCase subclass: #AssertionlessTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'AssertionlessTestRuleTest class' category: 'TestLint-Tests'!
 AssertionlessTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #EmptyMethodCategoryRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #EmptyMethodCategoryRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'EmptyMethodCategoryRuleTest class' category: 'TestLint-Tests'!
+EmptyMethodCategoryRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #ExpectedTestSmellInformationTest category: 'TestLint-Tests'!
@@ -425,6 +435,16 @@ TestLintRule subclass: #MethodCategoryRule
 	category: 'TestLint-Model'!
 !classDefinition: 'MethodCategoryRule class' category: 'TestLint-Model'!
 MethodCategoryRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #EmptyMethodCategoryRule category: 'TestLint-Model'!
+MethodCategoryRule subclass: #EmptyMethodCategoryRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'EmptyMethodCategoryRule class' category: 'TestLint-Model'!
+EmptyMethodCategoryRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #MixedSelectorsRule category: 'TestLint-Model'!
@@ -868,6 +888,33 @@ compiledTestWithoutAssert
 expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose')! !
+
+!EmptyMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 11/12/2022 16:24:40'!
+test01CategoryWithMethodsDoesNotViolateEmptyMethodCategoryRule
+
+	| anEmptyMethodCategoryRule results |
+	anEmptyMethodCategoryRule := EmptyMethodCategoryRule new.
+	
+	results := anEmptyMethodCategoryRule runMethodCategory: (MethodCategoryNode for: 'tests' of: EmptyMethodCategoryRuleTest categorizedWith: self class organization).
+	
+	self assert: 0 equals: results size.! !
+
+!EmptyMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 11/12/2022 16:31:38'!
+test02CategoryWithoutMethodsViolatesEmptyMethodCategoryRule
+
+	| aMethodCategoryNode anEmptyMethodCategoryRule results |
+	aMethodCategoryNode := MethodCategoryNode for: 'empty category' of: EmptyMethodCategoryRuleTest categorizedWith: self class organization.
+	anEmptyMethodCategoryRule := EmptyMethodCategoryRule new.
+	
+	results := anEmptyMethodCategoryRule runMethodCategory: aMethodCategoryNode.
+	
+	self assert: 1 equals: results size.
+	self assert: (TestSmell withNode: aMethodCategoryNode andRuleClass: anEmptyMethodCategoryRule class) message equals: results first message! !
+
+!EmptyMethodCategoryRuleTest methodsFor: 'expected test smells' stamp: 'FL 11/12/2022 16:34:41'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #'empty category' for: EmptyMethodCategoryRule because: 'Testing purpose')! !
 
 !ExpectedTestSmellInformationTest methodsFor: 'tests' stamp: 'FL 7/2/2022 12:07:56'!
 test01ExpectedTestSmellInformationCanBeConvertedToExpectedTestSmellForMethodRule
@@ -2811,6 +2858,21 @@ runMethodCategory: aMethodCategoryNode
 !MethodCategoryRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
 description
 	self subclassResponsibility ! !
+
+!EmptyMethodCategoryRule methodsFor: 'execution' stamp: 'FL 11/12/2022 16:28:13'!
+isViolatedBy: aMethodCategoryNode 
+	^aMethodCategoryNode compiledMethodsList isEmpty ! !
+
+!EmptyMethodCategoryRule class methodsFor: 'message' stamp: 'FL 11/12/2022 16:39:45'!
+description
+	^'It is a method category with no methods.
+	
+An empty method category only clutters the method category list.
+Maybe it used to have methods that were removed and it has lost its purpose.'! !
+
+!EmptyMethodCategoryRule class methodsFor: 'message' stamp: 'FL 11/12/2022 16:35:30'!
+title
+	^'Empty Method Category'! !
 
 !MixedSelectorsRule methodsFor: 'testing' stamp: 'FL 5/28/2022 12:02:00'!
 areAllMethodsOfSameType: compiledMethodsCollection 
