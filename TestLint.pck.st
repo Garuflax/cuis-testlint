@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 12 November 2022 at 4:42:24 pm'!
+'From Cuis 6.0 [latest update: #5510] on 26 November 2022 at 11:18:33 am'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 33!
+!provides: 'TestLint' 1 34!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -15,6 +15,16 @@ SystemWindow subclass: #TestLintResultWindow
 	category: 'TestLint-GUI'!
 !classDefinition: 'TestLintResultWindow class' category: 'TestLint-GUI'!
 TestLintResultWindow class
+	instanceVariableNames: ''!
+
+!classDefinition: #AbnormalUTFUseRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #AbnormalUTFUseRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'AbnormalUTFUseRuleTest class' category: 'TestLint-Tests'!
+AbnormalUTFUseRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #AnonymousTestRuleTest category: 'TestLint-Tests'!
@@ -397,6 +407,16 @@ TestLintRule subclass: #ClassRule
 ClassRule class
 	instanceVariableNames: ''!
 
+!classDefinition: #AbnormalUTFUseRule category: 'TestLint-Model'!
+ClassRule subclass: #AbnormalUTFUseRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'AbnormalUTFUseRule class' category: 'TestLint-Model'!
+AbnormalUTFUseRule class
+	instanceVariableNames: ''!
+
 !classDefinition: #MaxInstanceVariablesRule category: 'TestLint-Model'!
 ClassRule subclass: #MaxInstanceVariablesRule
 	instanceVariableNames: 'threshold'
@@ -700,6 +720,62 @@ testSmellsList
 displayTestLintResultFrom: results
 	
 	self open: results label: 'TestLint Result'.! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'tests' stamp: 'FL 11/26/2022 10:32:51'!
+test01ClassThatDoesNotOverrideAnyMethodSatisfyRule
+
+    | anAbnormalUTFUseRule result aTestClassNode |
+    anAbnormalUTFUseRule := AbnormalUTFUseRule new.
+    aTestClassNode := TestClassNode for: self classThatDoesNotOverrideAnyMethod.
+    
+    result := anAbnormalUTFUseRule runClass: aTestClassNode.
+    
+    self assert: result isEmpty.! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'tests' stamp: 'FL 11/26/2022 10:32:23'!
+test02ClassThatDoesOverrideAMethodViolatesRule
+
+    | anAbnormalUTFUseRule result aTestClassNode |
+    anAbnormalUTFUseRule := AbnormalUTFUseRule new.
+    aTestClassNode := TestClassNode for: self classThatDoesOverrideAMethod.
+    
+    result := anAbnormalUTFUseRule runClass: aTestClassNode.
+    
+    self assert: 1 equals: result size.
+    self assert: (TestSmell withNode: aTestClassNode andRuleClass: anAbnormalUTFUseRule class) message equals: result first message.! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'tests' stamp: 'FL 11/26/2022 11:09:14'!
+test03ClassThatDoesOverrideAPermittedMethodSatisfyRule
+
+    | anAbnormalUTFUseRule result aTestClassNode |
+    anAbnormalUTFUseRule := AbnormalUTFUseRule new.
+    aTestClassNode := TestClassNode for: self classThatDoesOverrideAPermittedMethod.
+    
+    result := anAbnormalUTFUseRule runClass: aTestClassNode.
+    
+    self assert: result isEmpty.! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'test objects' stamp: 'FL 11/22/2022 22:43:13'!
+classThatDoesNotOverrideAnyMethod
+	^Smalltalk classNamed: 'AnonymousTestRuleTest'! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'test objects' stamp: 'FL 11/26/2022 10:26:30'!
+classThatDoesOverrideAMethod
+	^Smalltalk classNamed: 'AbnormalUTFUseRuleTest'! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'test objects' stamp: 'FL 11/26/2022 11:09:37'!
+classThatDoesOverrideAPermittedMethod
+	^Smalltalk classNamed: 'TeardownOnlyRuleTest'! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'override UTF' stamp: 'FL 11/26/2022 10:37:59'!
+should: aBlock
+
+	self fail! !
+
+!AbnormalUTFUseRuleTest methodsFor: 'excepted rules' stamp: 'FL 11/26/2022 11:16:35'!
+exceptedTestLintRules
+
+	^Array with: AbnormalUTFUseRule.! !
 
 !AnonymousTestRuleTest methodsFor: 'tests' stamp: 'FL 9/1/2022 20:00:16'!
 test01AnonymousTestRuleNotSatisfied
@@ -2764,6 +2840,22 @@ newWithDefaults
 !ClassRule methodsFor: 'evaluating' stamp: 'FL 6/8/2022 19:14:51'!
 runClass: aTestClassNode 
 	^self runForReal: aTestClassNode.! !
+
+!AbnormalUTFUseRule methodsFor: 'execution' stamp: 'FL 11/26/2022 11:12:10'!
+isViolatedBy: aNode 
+	^(TestCase selectors intersection: (aNode linkedClass selectors difference: self overridableMethods)) notEmpty ! !
+
+!AbnormalUTFUseRule methodsFor: 'execution' stamp: 'FL 11/26/2022 11:15:15'!
+overridableMethods
+	^#(#setUp #tearDown)! !
+
+!AbnormalUTFUseRule class methodsFor: 'message' stamp: 'FL 11/26/2022 10:54:17'!
+description
+	^'test-suite overriding the default code-behavior of the unit testing framework'! !
+
+!AbnormalUTFUseRule class methodsFor: 'message' stamp: 'FL 11/26/2022 10:54:33'!
+title
+	^'Abnormal UTF-Use'! !
 
 !MaxInstanceVariablesRule methodsFor: 'initialization' stamp: 'FL 6/8/2022 19:17:28'!
 initializeWithThreshold: aThreshold 
