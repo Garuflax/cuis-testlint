@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 26 November 2022 at 11:18:33 am'!
+'From Cuis 6.0 [latest update: #5510] on 29 November 2022 at 10:38:43 am'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 34!
+!provides: 'TestLint' 1 35!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -195,6 +195,16 @@ TestCase subclass: #TestWithReturnRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'TestWithReturnRuleTest class' category: 'TestLint-Tests'!
 TestWithReturnRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #TranscriptingTestRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #TranscriptingTestRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'TranscriptingTestRuleTest class' category: 'TestLint-Tests'!
+TranscriptingTestRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #UnclassifiedMethodCategoryRuleTest category: 'TestLint-Tests'!
@@ -565,6 +575,16 @@ MethodRule subclass: #TestWithReturnRule
 	category: 'TestLint-Model'!
 !classDefinition: 'TestWithReturnRule class' category: 'TestLint-Model'!
 TestWithReturnRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #TranscriptingTestRule category: 'TestLint-Model'!
+MethodRule subclass: #TranscriptingTestRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'TranscriptingTestRule class' category: 'TestLint-Model'!
+TranscriptingTestRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #UnclassifiedMethodCategoryRule category: 'TestLint-Model'!
@@ -1781,6 +1801,47 @@ test02TestWithoutReturnDoesNotViolateTestWithReturnRule
 expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithReturn for: TestWithReturnRule because: 'Testing purpose')! !
+
+!TranscriptingTestRuleTest methodsFor: 'tests' stamp: 'FL 11/29/2022 09:59:14'!
+test01TestThatUsesTanscriptClassViolatesTranscriptingTestRule
+
+	| aTranscriptingTestRule aTestMethodNode result |
+	aTranscriptingTestRule := TranscriptingTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTranscriptingTest.
+	
+	result := aTranscriptingTestRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aTranscriptingTestRule class) message equals: result first message.! !
+
+!TranscriptingTestRuleTest methodsFor: 'tests' stamp: 'FL 11/29/2022 10:12:56'!
+test02TestThatDoesNotUseTanscriptClassDoesNotViolateTranscriptingTestRule
+
+	| aTranscriptingTestRule aTestMethodNode result |
+	aTranscriptingTestRule := TranscriptingTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledNotTranscriptingTest.
+	
+	result := aTranscriptingTestRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
+
+!TranscriptingTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 11/29/2022 10:13:33'!
+compiledNotTranscriptingTest
+	^ self class compiledMethodAt: #test02TestThatDoesNotUseTanscriptClassDoesNotViolateTranscriptingTestRule! !
+
+!TranscriptingTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 11/29/2022 10:02:15'!
+compiledTranscriptingTest
+	^ self class compiledMethodAt: #testThatUsesTranscript! !
+
+!TranscriptingTestRuleTest methodsFor: 'test objects' stamp: 'FL 11/29/2022 10:03:49'!
+testThatUsesTranscript
+
+	self assert: Transcript maxEntries > 2.! !
+
+!TranscriptingTestRuleTest methodsFor: 'expected test smells' stamp: 'FL 11/29/2022 10:36:42'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testThatUsesTranscript for: TranscriptingTestRule because: 'Testing purpose')! !
 
 !UnclassifiedMethodCategoryRuleTest methodsFor: 'tests' stamp: 'FL 9/21/2022 23:08:38'!
 test01UnclassifiedMethodCategoryRuleNotSatisfied
@@ -3295,6 +3356,34 @@ Returning something gives the idea that it will be used with another purpose.'! 
 !TestWithReturnRule class methodsFor: 'message' stamp: 'FL 9/27/2022 21:56:20'!
 title
 	^'Has return'! !
+
+!TranscriptingTestRule methodsFor: 'execution' stamp: 'FL 11/29/2022 10:20:40'!
+isViolatedBy: aNode 
+	^self usesTranscriptClass: aNode! !
+
+!TranscriptingTestRule methodsFor: 'execution' stamp: 'FL 11/29/2022 10:23:15'!
+usesTranscriptClass: aTestMethodNode 
+	| usesTranscriptClass transcriptClassFinder |
+
+   usesTranscriptClass := false.
+   transcriptClassFinder := ParseNodeEnumerator ofBlock: [:node |
+       (self isTranscriptClass: node) ifTrue: [usesTranscriptClass := true]].
+
+   aTestMethodNode methodNode accept: transcriptClassFinder.
+
+   ^usesTranscriptClass ! !
+
+!TranscriptingTestRule methodsFor: 'testing' stamp: 'FL 11/29/2022 10:35:19'!
+isTranscriptClass: node 
+	^node isVariableNode and: [node isNamed: #Transcript]! !
+
+!TranscriptingTestRule class methodsFor: 'message' stamp: 'FL 11/29/2022 10:05:15'!
+description
+	^'Test is writing/logging to the console.'! !
+
+!TranscriptingTestRule class methodsFor: 'message' stamp: 'FL 11/29/2022 10:05:59'!
+title
+	^'Transcripting Test'! !
 
 !UnclassifiedMethodCategoryRule methodsFor: 'execution' stamp: 'FL 9/21/2022 23:34:08'!
 isViolatedBy: aTestMethodNode 

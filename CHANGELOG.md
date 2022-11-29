@@ -6,6 +6,7 @@ and due to the way Cuis Smalltalk manages package versions, this project does no
 
 ## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.33...HEAD)
 ### Added
+- Rule for detecting tests that use the "Transcript" class.
 - Rule for detecting test classes that override the default code-behavior of the unit testing framework.
 
 ## [1.33](https://github.com/Garuflax/cuis-testlint/compare/v1.27...v1.33) - 2022-11-12
