@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 29 November 2022 at 10:38:43 am'!
+'From Cuis 6.0 [latest update: #5510] on 10 December 2022 at 6:09:55 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 35!
+!provides: 'TestLint' 1 36!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -125,6 +125,16 @@ TestCase subclass: #ProperOrganizationTestRuleTest
 	category: 'TestLint-Tests'!
 !classDefinition: 'ProperOrganizationTestRuleTest class' category: 'TestLint-Tests'!
 ProperOrganizationTestRuleTest class
+	instanceVariableNames: ''!
+
+!classDefinition: #ReturningAssertionRuleTest category: 'TestLint-Tests'!
+TestCase subclass: #ReturningAssertionRuleTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Tests'!
+!classDefinition: 'ReturningAssertionRuleTest class' category: 'TestLint-Tests'!
+ReturningAssertionRuleTest class
 	instanceVariableNames: ''!
 
 !classDefinition: #TeardownOnlyRuleTest category: 'TestLint-Tests'!
@@ -565,6 +575,16 @@ MethodRule subclass: #ProperOrganizationTestRule
 	category: 'TestLint-Model'!
 !classDefinition: 'ProperOrganizationTestRule class' category: 'TestLint-Model'!
 ProperOrganizationTestRule class
+	instanceVariableNames: ''!
+
+!classDefinition: #ReturningAssertionRule category: 'TestLint-Model'!
+MethodRule subclass: #ReturningAssertionRule
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TestLint-Model'!
+!classDefinition: 'ReturningAssertionRule class' category: 'TestLint-Model'!
+ReturningAssertionRule class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestWithReturnRule category: 'TestLint-Model'!
@@ -1370,6 +1390,122 @@ compiledTestWithoutAssert
 expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule for: ProperOrganizationTestRule because: 'Testing purpose')! !
+
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:40:32'!
+test01TestAssigningAssertionResultViolatesReturningAssertionRule
+
+	| aReturningAssertionRule aTestMethodNode result |
+	aReturningAssertionRule := ReturningAssertionRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestAssigningAssertionResult.
+	
+	result := aReturningAssertionRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:25:02'!
+test02TestWithoutReturningAssertionDoesNotViolateReturningAssertionRule
+
+	| aReturningAssertionRule aTestMethodNode result |
+	aReturningAssertionRule := ReturningAssertionRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithoutReturningAssertion.
+	
+	result := aReturningAssertionRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
+
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:44:35'!
+test03TestUsingAssertionAsArgumentViolatesReturningAssertionRule
+
+	| aReturningAssertionRule aTestMethodNode result |
+	aReturningAssertionRule := ReturningAssertionRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestUsingAssertionAsArgument.
+	
+	result := aReturningAssertionRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 17:50:40'!
+test04TestUsingAssertionAsInnerArgumentViolatesReturningAssertionRule
+
+	| aReturningAssertionRule aTestMethodNode result |
+	aReturningAssertionRule := ReturningAssertionRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestUsingAssertionAsInnerArgument.
+	
+	result := aReturningAssertionRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 17:51:15'!
+test05TestUsingAssertionResultAsReceiverViolatesReturningAssertionRule
+
+	| aReturningAssertionRule aTestMethodNode result |
+	aReturningAssertionRule := ReturningAssertionRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestUsingAssertionResultAsReceiver.
+	
+	result := aReturningAssertionRule runMethod: aTestMethodNode.
+	
+	self assert: 1 equals: result size.
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+
+!ReturningAssertionRuleTest methodsFor: 'expected test smells' stamp: 'FL 12/10/2022 18:06:54'!
+expectedTestSmells
+
+	^Array with: (ExpectedTestSmellInformation in: #testAssigningAssertionResult for: ReturningAssertionRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testUsingAssertionAsArgument for: ReturningAssertionRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testUsingAssertionAsInnerArgument for: ReturningAssertionRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testUsingAssertionResultAsReceiver for: ReturningAssertionRule because: 'Testing purpose')! !
+
+!ReturningAssertionRuleTest methodsFor: 'test objects' stamp: 'FL 12/10/2022 16:40:12'!
+testAssigningAssertionResult
+
+	| res |
+	res := self assert: 3 equals: 3.
+	self assert: res equals: self.! !
+
+!ReturningAssertionRuleTest methodsFor: 'test objects' stamp: 'FL 12/10/2022 16:41:56'!
+testUsingAssertionAsArgument
+
+	self assert: (self assert: 3 equals: 3) equals: self.! !
+
+!ReturningAssertionRuleTest methodsFor: 'test objects' stamp: 'FL 12/10/2022 17:13:20'!
+testUsingAssertionAsInnerArgument
+
+	self assert: (((self assert: 3 equals: 3) isNil) not).! !
+
+!ReturningAssertionRuleTest methodsFor: 'test objects' stamp: 'FL 12/10/2022 17:14:49'!
+testUsingAssertionResultAsReceiver
+
+	(self assert: 3 equals: 3) assert: 3 equals: 3.! !
+
+!ReturningAssertionRuleTest methodsFor: 'test objects' stamp: 'FL 12/10/2022 16:16:10'!
+testWithoutReturningAssertion
+
+	self assert: 3 equals: 3! !
+
+!ReturningAssertionRuleTest methodsFor: 'compiled methods' stamp: 'FL 12/10/2022 16:40:32'!
+compiledTestAssigningAssertionResult
+
+	^ self class compiledMethodAt: #testAssigningAssertionResult! !
+
+!ReturningAssertionRuleTest methodsFor: 'compiled methods' stamp: 'FL 12/10/2022 16:42:32'!
+compiledTestUsingAssertionAsArgument
+
+	^ self class compiledMethodAt: #testUsingAssertionAsArgument! !
+
+!ReturningAssertionRuleTest methodsFor: 'compiled methods' stamp: 'FL 12/10/2022 17:13:56'!
+compiledTestUsingAssertionAsInnerArgument
+
+	^ self class compiledMethodAt: #testUsingAssertionAsInnerArgument! !
+
+!ReturningAssertionRuleTest methodsFor: 'compiled methods' stamp: 'FL 12/10/2022 17:14:39'!
+compiledTestUsingAssertionResultAsReceiver
+
+	^ self class compiledMethodAt: #testUsingAssertionResultAsReceiver! !
+
+!ReturningAssertionRuleTest methodsFor: 'compiled methods' stamp: 'FL 12/10/2022 16:18:06'!
+compiledTestWithoutReturningAssertion
+
+	^ self class compiledMethodAt: #testWithoutReturningAssertion! !
 
 !TeardownOnlyRuleTest methodsFor: 'tests' stamp: 'FL 10/30/2022 15:28:57'!
 test01ClassWithoutSetupAndTeardownDoesNotViolateRule
@@ -3335,6 +3471,39 @@ So asserts should be together at the end of the test.'! !
 !ProperOrganizationTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 19:13:32'!
 title
 	^'Improper Organization'! !
+
+!ReturningAssertionRule methodsFor: 'execution' stamp: 'FL 12/10/2022 16:54:34'!
+isViolatedBy: aTestMethodNode 
+	| linkedClass |
+	
+	linkedClass := aTestMethodNode linkedClass.
+	aTestMethodNode methodNode accept: (ParseNodeEnumerator
+							ofBlock: [:node |( (self isAnAssignmentNode: linkedClass ofAnAssertionForClass: node) or: [self isAMessageNode: node withAnAssertionArgumentForClass: linkedClass]) ifTrue: [^true]]).
+							
+	^false.! !
+
+!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 17:07:49'!
+hasAssertion: aCollectionOfNodes forClass: linkedClass 
+	
+	^(aCollectionOfNodes select: [ :node | node isMessageNode] thenCollect: [:messageNode | (AssertionChecker for: messageNode ofClass: linkedClass) check]) anySatisfy: [:bool | bool].! !
+
+!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 18:04:45'!
+isAMessageNode: node withAnAssertionArgumentForClass: linkedClass 
+	
+	^ node isMessageNode and: [self hasAssertion: (Array with: node receiver) , node arguments forClass: linkedClass]! !
+
+!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 17:18:28'!
+isAnAssignmentNode: linkedClass ofAnAssertionForClass: node
+
+	^ node isAssignmentNode and: [self hasAssertion: (Array with: node value) forClass: linkedClass ]! !
+
+!ReturningAssertionRule class methodsFor: 'message' stamp: 'FL 12/10/2022 16:21:33'!
+description
+	^'It has an assertion that returns.'! !
+
+!ReturningAssertionRule class methodsFor: 'message' stamp: 'FL 12/10/2022 16:22:24'!
+title
+	^'Returning Assertion'! !
 
 !TestWithReturnRule methodsFor: 'execution' stamp: 'FL 9/27/2022 22:29:37'!
 isViolatedBy: aTestMethodNode 

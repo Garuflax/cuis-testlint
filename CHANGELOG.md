@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.33...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.36...HEAD)
+
+## [1.36](https://github.com/Garuflax/cuis-testlint/compare/v1.33...v1.36) - 2022-12-10
 ### Added
 - Rule for detecting tests that use the "Transcript" class.
 - Rule for detecting test classes that override the default code-behavior of the unit testing framework.
+- Rule for detecting returning assertions.
 
 ## [1.33](https://github.com/Garuflax/cuis-testlint/compare/v1.27...v1.33) - 2022-11-12
 ### Added
