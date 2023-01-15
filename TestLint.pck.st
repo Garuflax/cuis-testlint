@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 10 December 2022 at 6:09:55 pm'!
+'From Cuis 6.0 [latest update: #5510] on 15 January 2023 at 5:23:23 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 36!
+!provides: 'TestLint' 1 37!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -289,7 +289,7 @@ TestLintRunner class
 
 !classDefinition: #AssertionChecker category: 'TestLint-Model'!
 Object subclass: #AssertionChecker
-	instanceVariableNames: 'messageNode class missingMethodNodesToVisit allSelectorsCalledInClassHierarchy'
+	instanceVariableNames: 'messageNode class missingMethodNodesToVisit allCheckedAndExceptedSelectorsInClassHierarchy'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -1372,6 +1372,28 @@ test03TestWithoutAssertSatisfiesProperOrganizationTestRule
 	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
 	
 	self assert: 0 equals: result size.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'tests' stamp: 'FL 1/15/2023 16:13:52'!
+test04TestWithExceptedMisplacedAssertionSatisfiesProperOrganizationTestRule
+
+	| aProperOrganizationTestRule aTestMethodNode result |
+	self precondition.
+	aProperOrganizationTestRule := ProperOrganizationTestRule new.
+	aTestMethodNode := TestMethodNode for: (self class compiledMethodAt: #test04TestWithExceptedMisplacedAssertionSatisfiesProperOrganizationTestRule).
+	
+	result := aProperOrganizationTestRule runMethod: aTestMethodNode.
+	
+	self assert: 0 equals: result size.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'excepted assertions' stamp: 'FL 1/15/2023 16:23:15'!
+exceptedTestLintSelectorsForAssertionAnalysis
+
+	^Array with: #precondition.! !
+
+!ProperOrganizationTestRuleTest methodsFor: 'preconditions' stamp: 'FL 1/15/2023 16:08:56'!
+precondition
+
+	self assert: true! !
 
 !ProperOrganizationTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/11/2022 20:16:47'!
 testWithoutAssert
@@ -2472,58 +2494,82 @@ testRules
 
 	^self concreteTestRulesClasses! !
 
-!AssertionChecker methodsFor: 'initialization' stamp: 'FL 7/10/2022 21:19:21'!
+!AssertionChecker methodsFor: 'initialization' stamp: 'FL 1/15/2023 16:48:36'!
 initializeFor: aMessageNode ofClass: aClass 
 	
 	messageNode := aMessageNode.
 	class := aClass.! !
 
-!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 7/11/2022 20:06:32'!
+!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 1/15/2023 16:47:33'!
 check
 	
 	(self isAssertionSelectorSymbol: messageNode selectorSymbol) ifTrue: [^true].
 	
 	missingMethodNodesToVisit := OrderedCollection new.
-	allSelectorsCalledInClassHierarchy := OrderedCollection new.
+	allCheckedAndExceptedSelectorsInClassHierarchy := self getExceptedTestLintSelectorsForAnalysis asOrderedCollection.
 	
-	(self isSelfOrSuperPseudoVariable: messageNode receiverOrCascadeReceiver) ifTrue: [
+	(self shouldCheckNode: messageNode) ifTrue: [
 		missingMethodNodesToVisit add: (self getMethodNodeInClassHierarchyForSelectorSymbol: messageNode selectorSymbol)].
 	
 	[missingMethodNodesToVisit notEmpty ] whileTrue: [| currentMethodNode |
 		currentMethodNode := missingMethodNodesToVisit removeFirst.
 		currentMethodNode accept: (ParseNodeEnumerator
 							ofBlock: [:node | node isMessageNode ifTrue: [
-									((self isSelfOrSuperPseudoVariable: node receiverOrCascadeReceiver) and: [(allSelectorsCalledInClassHierarchy includes: node selectorSymbol) not]) ifTrue: [
+									(self shouldCheckNode: node) ifTrue: [
 										missingMethodNodesToVisit add:(  self getMethodNodeInClassHierarchyForSelectorSymbol: node selectorSymbol )].
-									allSelectorsCalledInClassHierarchy add: node selectorSymbol.
+									allCheckedAndExceptedSelectorsInClassHierarchy add: node selectorSymbol.
 									 ]]
 							).
 		].
 	
-	^allSelectorsCalledInClassHierarchy anySatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
+	^allCheckedAndExceptedSelectorsInClassHierarchy anySatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
 
 !AssertionChecker methodsFor: 'evaluating' stamp: 'FL 7/11/2022 19:40:27'!
 getMethodNodeInClassHierarchyForSelectorSymbol: aSymbol 
 	^((class whichClassIncludesSelector: aSymbol) compiledMethodAt: aSymbol) methodNode! !
+
+!AssertionChecker methodsFor: 'accessing' stamp: 'FL 1/15/2023 17:17:14'!
+getExceptedTestLintSelectorsForAnalysis
+
+	| classWithExceptedTestLintSelectorsForAnalysisMethod exceptedTestLintSelectorsSelector |
+	exceptedTestLintSelectorsSelector := self class exceptionsSelector.
+	classWithExceptedTestLintSelectorsForAnalysisMethod := class whichClassIncludesSelector: exceptedTestLintSelectorsSelector.
+	classWithExceptedTestLintSelectorsForAnalysisMethod  ifNil: [^#()].
+	^(classWithExceptedTestLintSelectorsForAnalysisMethod compiledMethodAt: exceptedTestLintSelectorsSelector)  valueWithReceiver: nil arguments: #().! !
 
 !AssertionChecker methodsFor: 'testing' stamp: 'FL 7/11/2022 19:05:29'!
 isAssertionSelectorSymbol: selectorSymbol
 
 	^ self class assertionSelectors includes: selectorSymbol ! !
 
+!AssertionChecker methodsFor: 'testing' stamp: 'FL 1/15/2023 16:50:30'!
+isSelectorExceptedOrWasAlreadyChecked: aSelector
+
+	^ (allCheckedAndExceptedSelectorsInClassHierarchy includes: aSelector) not! !
+
 !AssertionChecker methodsFor: 'testing' stamp: 'FL 7/11/2022 19:17:45'!
 isSelfOrSuperPseudoVariable: receiver 
 	^receiver isSelfPseudoVariable or: [receiver isSuperPseudoVariable ]! !
+
+!AssertionChecker methodsFor: 'testing' stamp: 'FL 1/15/2023 16:50:31'!
+shouldCheckNode: aNode
+
+	^ (self isSelfOrSuperPseudoVariable: aNode receiverOrCascadeReceiver) and: [self isSelectorExceptedOrWasAlreadyChecked: aNode selectorSymbol]! !
 
 !AssertionChecker class methodsFor: 'instance creation' stamp: 'FL 7/10/2022 21:19:02'!
 for: aMessageNode ofClass: aClass 
 	
 	^self new initializeFor: aMessageNode ofClass: aClass ! !
 
-!AssertionChecker class methodsFor: 'selectors list' stamp: 'FL 10/10/2022 16:19:00'!
+!AssertionChecker class methodsFor: 'selectors' stamp: 'FL 10/10/2022 16:19:00'!
 assertionSelectors
 
 	^Array with: #assert:description: with: #assert: with: #should:raise:withExceptionDo:description: with: #shouldnt:raise:description:! !
+
+!AssertionChecker class methodsFor: 'selectors' stamp: 'FL 1/15/2023 17:10:22'!
+exceptionsSelector
+	
+	^#exceptedTestLintSelectorsForAssertionAnalysis! !
 
 !ExpectedTestSmell methodsFor: 'initialization' stamp: 'FL 6/4/2022 16:46:20'!
 initializeIn: aNode for: aRuleClass because: aDescription 
@@ -3684,3 +3730,8 @@ runTestLintOverMethod
 
 	
 	! !
+
+!DynamicallyCodeCreationTest methodsFor: '*TestLint' stamp: 'FL 1/15/2023 16:59:03'!
+exceptedTestLintSelectorsForAssertionAnalysis
+
+	^Array with: #createClassNamed:subclassOf:instanceVariableNames:classVariableNames:poolDictionaries:category:.! !
