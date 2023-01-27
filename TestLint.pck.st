@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 15 January 2023 at 5:23:23 pm'!
+'From Cuis 6.0 [latest update: #5510] on 26 January 2023 at 8:58:52 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 37!
+!provides: 'TestLint' 1 38!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -329,7 +329,7 @@ TestLint class
 
 !classDefinition: #TestLintFailure category: 'TestLint-Model'!
 Object subclass: #TestLintFailure
-	instanceVariableNames: 'node ruleClass'
+	instanceVariableNames: 'node ruleClass description'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -339,7 +339,7 @@ TestLintFailure class
 
 !classDefinition: #MissingTestSmell category: 'TestLint-Model'!
 TestLintFailure subclass: #MissingTestSmell
-	instanceVariableNames: 'description'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -409,7 +409,7 @@ TestMethodNode class
 
 !classDefinition: #TestLintRule category: 'TestLint-Model'!
 Object subclass: #TestLintRule
-	instanceVariableNames: ''
+	instanceVariableNames: 'violationExtraInformation'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
@@ -1413,7 +1413,7 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithoutAssert for: GuardedTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #testWithoutAssert for: AssertionlessTestRule because: 'Testing purpose') with: (ExpectedTestSmellInformation in: #test02NotConnectedAssertsDoNotSatisfiesProperOrganizationTestRule for: ProperOrganizationTestRule because: 'Testing purpose')! !
 
-!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:40:32'!
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 1/26/2023 20:57:11'!
 test01TestAssigningAssertionResultViolatesReturningAssertionRule
 
 	| aReturningAssertionRule aTestMethodNode result |
@@ -1423,7 +1423,7 @@ test01TestAssigningAssertionResultViolatesReturningAssertionRule
 	result := aReturningAssertionRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message , ReturningAssertionRule detailHeader , 'assert:equals: -> assert:description:' equals: result first message.! !
 
 !ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:25:02'!
 test02TestWithoutReturningAssertionDoesNotViolateReturningAssertionRule
@@ -1436,7 +1436,7 @@ test02TestWithoutReturningAssertionDoesNotViolateReturningAssertionRule
 	
 	self assert: result isEmpty.! !
 
-!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 16:44:35'!
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 1/26/2023 20:57:28'!
 test03TestUsingAssertionAsArgumentViolatesReturningAssertionRule
 
 	| aReturningAssertionRule aTestMethodNode result |
@@ -1446,9 +1446,9 @@ test03TestUsingAssertionAsArgumentViolatesReturningAssertionRule
 	result := aReturningAssertionRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message , ReturningAssertionRule detailHeader , 'assert:equals: -> assert:description:' equals: result first message.! !
 
-!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 17:50:40'!
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 1/26/2023 20:57:37'!
 test04TestUsingAssertionAsInnerArgumentViolatesReturningAssertionRule
 
 	| aReturningAssertionRule aTestMethodNode result |
@@ -1458,9 +1458,9 @@ test04TestUsingAssertionAsInnerArgumentViolatesReturningAssertionRule
 	result := aReturningAssertionRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message , ReturningAssertionRule detailHeader , 'assert:equals: -> assert:description:' equals: result first message.! !
 
-!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 12/10/2022 17:51:15'!
+!ReturningAssertionRuleTest methodsFor: 'tests' stamp: 'FL 1/26/2023 20:57:47'!
 test05TestUsingAssertionResultAsReceiverViolatesReturningAssertionRule
 
 	| aReturningAssertionRule aTestMethodNode result |
@@ -1470,7 +1470,7 @@ test05TestUsingAssertionResultAsReceiverViolatesReturningAssertionRule
 	result := aReturningAssertionRule runMethod: aTestMethodNode.
 	
 	self assert: 1 equals: result size.
-	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message equals: result first message.! !
+	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aReturningAssertionRule class) message , ReturningAssertionRule detailHeader , 'assert:equals: -> assert:description:' equals: result first message.! !
 
 !ReturningAssertionRuleTest methodsFor: 'expected test smells' stamp: 'FL 12/10/2022 18:06:54'!
 expectedTestSmells
@@ -2500,13 +2500,18 @@ initializeFor: aMessageNode ofClass: aClass
 	messageNode := aMessageNode.
 	class := aClass.! !
 
-!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 1/15/2023 16:47:33'!
+!AssertionChecker methodsFor: 'evaluating' stamp: 'FL 1/26/2023 20:52:37'!
 check
+	| routes assertionSelectorSymbol |
 	
-	(self isAssertionSelectorSymbol: messageNode selectorSymbol) ifTrue: [^true].
+	routes := Dictionary new.
+	routes at: messageNode selectorSymbol put: messageNode selectorSymbol asString.
+	
+	(self isAssertionSelectorSymbol: messageNode selectorSymbol) ifTrue: [^routes at: messageNode selectorSymbol ].
 	
 	missingMethodNodesToVisit := OrderedCollection new.
 	allCheckedAndExceptedSelectorsInClassHierarchy := self getExceptedTestLintSelectorsForAnalysis asOrderedCollection.
+	
 	
 	(self shouldCheckNode: messageNode) ifTrue: [
 		missingMethodNodesToVisit add: (self getMethodNodeInClassHierarchyForSelectorSymbol: messageNode selectorSymbol)].
@@ -2518,11 +2523,14 @@ check
 									(self shouldCheckNode: node) ifTrue: [
 										missingMethodNodesToVisit add:(  self getMethodNodeInClassHierarchyForSelectorSymbol: node selectorSymbol )].
 									allCheckedAndExceptedSelectorsInClassHierarchy add: node selectorSymbol.
+									routes at: node selectorSymbol put: (routes at: currentMethodNode selector), ' -> ' , node selectorSymbol asString.
 									 ]]
 							).
 		].
 	
-	^allCheckedAndExceptedSelectorsInClassHierarchy anySatisfy: [:selector | self isAssertionSelectorSymbol: selector ]! !
+	assertionSelectorSymbol := allCheckedAndExceptedSelectorsInClassHierarchy detect: [:selector | self isAssertionSelectorSymbol: selector ] ifNone: [^''].
+	
+	^routes at: assertionSelectorSymbol.! !
 
 !AssertionChecker methodsFor: 'evaluating' stamp: 'FL 7/11/2022 19:40:27'!
 getMethodNodeInClassHierarchyForSelectorSymbol: aSymbol 
@@ -2768,7 +2776,7 @@ isTestSmell
 
 	^false! !
 
-!MissingTestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:55:09'!
+!TestLintFailure methodsFor: 'initialization' stamp: 'FL 1/26/2023 20:11:11'!
 initializeWithNode: aNode andRuleClass: aRuleClass because: aDescription  
 	
 	node := aNode.
@@ -2793,16 +2801,10 @@ withNode: aNode andRuleClass: aRuleClass because: aDescription
 	
 	^self new initializeWithNode: aNode andRuleClass: aRuleClass  because: aDescription ! !
 
-!TestSmell methodsFor: 'initialization' stamp: 'FL 9/1/2022 19:56:58'!
-initializeWithNode: aNode andRuleClass: aRuleClass   
-	
-	node := aNode.
-	ruleClass := aRuleClass.! !
-
-!TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:38'!
+!TestSmell methodsFor: 'accessing' stamp: 'FL 1/26/2023 20:15:21'!
 message
 
-	^ruleClass description.! !
+	^ruleClass description , description.! !
 
 !TestSmell methodsFor: 'accessing' stamp: 'FL 9/1/2022 19:55:41'!
 title
@@ -2813,10 +2815,15 @@ isTestSmell
 
 	^true! !
 
-!TestSmell class methodsFor: 'instance creation' stamp: 'FL 9/1/2022 19:58:07'!
+!TestSmell class methodsFor: 'instance creation' stamp: 'FL 1/26/2023 20:13:02'!
 withNode: aNode andRuleClass: aRuleClass   
 	
-	^self new initializeWithNode: aNode andRuleClass: aRuleClass ! !
+	^self withNode: aNode andRuleClass: aRuleClass  because: ''! !
+
+!TestSmell class methodsFor: 'instance creation' stamp: 'FL 1/26/2023 20:12:03'!
+withNode: aNode andRuleClass: aRuleClass because: aString
+	
+	^self new initializeWithNode: aNode andRuleClass: aRuleClass because: aString! !
 
 !TestLintNode methodsFor: 'accessing' stamp: 'FL 6/5/2022 16:44:40'!
 linkedClass
@@ -3062,9 +3069,14 @@ runNode: aNode
 noTestSmell
 	^OrderedCollection new.! !
 
-!TestLintRule methodsFor: 'test smell' stamp: 'FL 9/1/2022 19:58:25'!
+!TestLintRule methodsFor: 'test smell' stamp: 'FL 1/26/2023 20:14:24'!
 testSmell: aNode 
-	^OrderedCollection with: (TestSmell withNode: aNode andRuleClass: self class).! !
+	^OrderedCollection with: (TestSmell withNode: aNode andRuleClass: self class because: violationExtraInformation).! !
+
+!TestLintRule methodsFor: 'initialization' stamp: 'FL 1/26/2023 20:26:27'!
+initialize
+
+	violationExtraInformation := ''.! !
 
 !TestLintRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
 description
@@ -3303,13 +3315,13 @@ isViolatedBy: aTestMethodNode
 							
 	^true.! !
 
-!AssertionlessTestRule methodsFor: 'testing' stamp: 'FL 7/11/2022 20:23:57'!
+!AssertionlessTestRule methodsFor: 'testing' stamp: 'FL 1/26/2023 19:59:13'!
 isAnAssertion: aMethodNode forClass: aClass
 	
 	| anAssertionChecker |
 	anAssertionChecker := AssertionChecker for: aMethodNode ofClass: aClass.
 	
-	^anAssertionChecker check.! !
+	^anAssertionChecker check isEmpty not.! !
 
 !AssertionlessTestRule class methodsFor: 'message' stamp: 'FL 8/31/2022 21:46:29'!
 description
@@ -3465,13 +3477,13 @@ errorInvalidThreshold
 
 	^ self error: self invalidThresholdDescription! !
 
-!ProperOrganizationTestRule methodsFor: 'testing' stamp: 'FL 7/11/2022 19:46:38'!
+!ProperOrganizationTestRule methodsFor: 'testing' stamp: 'FL 1/26/2023 19:59:22'!
 isAnAssertion: aMethodNode forClass: aClass
 	
 	| anAssertionChecker |
 	anAssertionChecker := AssertionChecker for: aMethodNode ofClass: aClass.
 	
-	^anAssertionChecker check.! !
+	^anAssertionChecker check isEmpty not.! !
 
 !ProperOrganizationTestRule methodsFor: 'testing' stamp: 'FL 7/18/2022 20:32:25'!
 isAnInnerAssertionNode
@@ -3528,10 +3540,14 @@ isViolatedBy: aTestMethodNode
 							
 	^false.! !
 
-!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 17:07:49'!
+!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 1/26/2023 20:50:05'!
 hasAssertion: aCollectionOfNodes forClass: linkedClass 
 	
-	^(aCollectionOfNodes select: [ :node | node isMessageNode] thenCollect: [:messageNode | (AssertionChecker for: messageNode ofClass: linkedClass) check]) anySatisfy: [:bool | bool].! !
+	aCollectionOfNodes select: [ :node | node isMessageNode] thenDo: [:messageNode | | assertionRoute | assertionRoute := (AssertionChecker for: messageNode ofClass: linkedClass) check.
+		assertionRoute isEmpty not ifTrue:[
+			violationExtraInformation := self class detailHeader, assertionRoute.
+			^true]].
+	^false! !
 
 !ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 18:04:45'!
 isAMessageNode: node withAnAssertionArgumentForClass: linkedClass 
@@ -3546,6 +3562,13 @@ isAnAssignmentNode: linkedClass ofAnAssertionForClass: node
 !ReturningAssertionRule class methodsFor: 'message' stamp: 'FL 12/10/2022 16:21:33'!
 description
 	^'It has an assertion that returns.'! !
+
+!ReturningAssertionRule class methodsFor: 'message' stamp: 'FL 1/26/2023 20:51:01'!
+detailHeader
+	
+	^'
+	
+	Route to assert: '! !
 
 !ReturningAssertionRule class methodsFor: 'message' stamp: 'FL 12/10/2022 16:22:24'!
 title
