@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5510] on 26 January 2023 at 8:58:52 pm'!
+'From Cuis 6.0 [latest update: #5706] on 6 May 2023 at 6:27:14 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 38!
+!provides: 'TestLint' 1 39!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -951,6 +951,17 @@ test04TestWithRecursiveCustomAssertIsNotAnAssertionlessTest
     
     self assert: 0 equals: result size.! !
 
+!AssertionlessTestRuleTest methodsFor: 'tests' stamp: 'FL 5/6/2023 16:33:36'!
+test05TestWithCascadeAssertIsNotAnAssertionlessTest
+
+    | anAssetionlessTestRule result aTestMethodNode |
+    anAssetionlessTestRule := AssertionlessTestRule new.
+    aTestMethodNode := TestMethodNode for: self compiledTestWithCascadeAssert.
+    
+    result := anAssetionlessTestRule runMethod: (aTestMethodNode).
+    
+    self assert: 0 equals: result size.! !
+
 !AssertionlessTestRuleTest methodsFor: 'assertions' stamp: 'FL 7/2/2022 15:47:13'!
 assertIsEven: aNumber
 
@@ -960,6 +971,14 @@ assertIsEven: aNumber
 assertIsEvenAndPositiveRecursive: aSmallInteger 
     
     aSmallInteger <= 0 ifTrue: [self deny: aSmallInteger negative ] ifFalse: [self assertIsEvenAndPositiveRecursive: aSmallInteger - 2]! !
+
+!AssertionlessTestRuleTest methodsFor: 'test objects' stamp: 'FL 5/6/2023 16:32:13'!
+testWithCascadeAssert
+
+    | aNumber |
+    aNumber := 2.
+    
+    self ifNil: []; assert: aNumber equals: 2.! !
 
 !AssertionlessTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/2/2022 15:46:46'!
 testWithCustomAssert
@@ -984,6 +1003,11 @@ testWithoutAssert
 	aNumber := 3.
 	
 	aNumber < 2 ifTrue: [self fail].! !
+
+!AssertionlessTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 5/6/2023 16:33:10'!
+compiledTestWithCascadeAssert
+
+	^ self class compiledMethodAt: #testWithCascadeAssert! !
 
 !AssertionlessTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/2/2022 15:47:36'!
 compiledTestWithCustomAssert
@@ -3549,10 +3573,10 @@ hasAssertion: aCollectionOfNodes forClass: linkedClass
 			^true]].
 	^false! !
 
-!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 18:04:45'!
+!ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 5/6/2023 16:45:27'!
 isAMessageNode: node withAnAssertionArgumentForClass: linkedClass 
 	
-	^ node isMessageNode and: [self hasAssertion: (Array with: node receiver) , node arguments forClass: linkedClass]! !
+	^ node isMessageNode and: [self hasAssertion: ((Array with: node receiver) , node arguments select: [:elem |	 elem isNil not]) forClass: linkedClass]! !
 
 !ReturningAssertionRule methodsFor: 'testing' stamp: 'FL 12/10/2022 17:18:28'!
 isAnAssignmentNode: linkedClass ofAnAssertionForClass: node

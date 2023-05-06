@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and due to the way Cuis Smalltalk manages package versions, this project does not follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.38...HEAD)
+## [Unreleased](https://github.com/Garuflax/cuis-testlint/compare/v1.39...HEAD)
+
+## [1.39](https://github.com/Garuflax/cuis-testlint/compare/v1.38...v1.39) - 2023-05-06
+### Fixed
+- Manage assertions with cascade operator ";".
 
 ## [1.38](https://github.com/Garuflax/cuis-testlint/compare/v1.36...v1.38) - 2023-01-26
 ### Added
