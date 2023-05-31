@@ -1,6 +1,6 @@
-'From Cuis 6.0 [latest update: #5706] on 6 May 2023 at 6:27:14 pm'!
+'From Cuis 6.0 [latest update: #5706] on 31 May 2023 at 2:56:48 pm'!
 'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 39!
+!provides: 'TestLint' 1 40!
 !requires: 'Regex' 1 5 nil!
 SystemOrganization addCategory: 'TestLint-GUI'!
 SystemOrganization addCategory: 'TestLint-Model'!
@@ -2228,10 +2228,31 @@ test02AssertWithEqualSymbolIsIncorrectUsage
 	self assert: 1 equals: result size.
 	self assert: (TestSmell withNode: aTestMethodNode andRuleClass: aWrongAssertUsageTestRule class) message equals: result first message.! !
 
+!WrongAssertUsageTestRuleTest methodsFor: 'tests' stamp: 'FL 5/31/2023 14:53:58'!
+test03AssertWithVariableIsCorrectUsage
+
+	| aWrongAssertUsageTestRule aTestMethodNode result |
+	aWrongAssertUsageTestRule := WrongAssertUsageTestRule new.
+	aTestMethodNode := TestMethodNode for: self compiledTestWithVariable.
+	
+	result := aWrongAssertUsageTestRule runMethod: aTestMethodNode.
+	
+	self assert: result isEmpty.! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 5/31/2023 14:53:18'!
+compiledTestWithVariable
+
+	^ self class compiledMethodAt: #testWithVariable! !
+
 !WrongAssertUsageTestRuleTest methodsFor: 'compiled methods' stamp: 'FL 7/17/2022 17:49:47'!
 compiledTestWithWrongAssertUsage
 
 	^ self class compiledMethodAt: #testWithWrongAssertUsage! !
+
+!WrongAssertUsageTestRuleTest methodsFor: 'test objects' stamp: 'FL 5/31/2023 14:52:32'!
+testWithVariable
+	
+	self assert: true.! !
 
 !WrongAssertUsageTestRuleTest methodsFor: 'test objects' stamp: 'FL 7/17/2022 17:50:12'!
 testWithWrongAssertUsage
@@ -3695,10 +3716,10 @@ description
 title
 	^'Unusual Test Order'! !
 
-!WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
+!WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 5/31/2023 14:54:38'!
 hasEqualMessageAsArgument: aMethodNode
 
-	^ (aMethodNode arguments at: 1) selectorSymbol = #=! !
+	^ ((aMethodNode arguments at: 1) isMessageNode) and: [(aMethodNode arguments at: 1) selectorSymbol = #=]! !
 
 !WrongAssertUsageTestRule methodsFor: 'testing' stamp: 'FL 7/17/2022 18:07:54'!
 isAMessageWithWrongAssertUsage: aMethodNode 
