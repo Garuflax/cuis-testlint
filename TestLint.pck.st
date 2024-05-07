@@ -1,649 +1,649 @@
-'From Cuis 6.0 [latest update: #5706] on 31 May 2023 at 2:56:48 pm'!
-'Description Test Smell analyser to determine test quality.'!
-!provides: 'TestLint' 1 40!
+'From Cuis6.3 [latest update: #6350] on 7 May 2024 at 5:30:37 pm'!
+'Description Make it work with Cuis 6.3'!
+!provides: 'TestLint' 1 41!
 !requires: 'Regex' 1 5 nil!
-SystemOrganization addCategory: 'TestLint-GUI'!
-SystemOrganization addCategory: 'TestLint-Model'!
-SystemOrganization addCategory: 'TestLint-Tests'!
+SystemOrganization addCategory: #'TestLint-GUI'!
+SystemOrganization addCategory: #'TestLint-Model'!
+SystemOrganization addCategory: #'TestLint-Tests'!
 
 
-!classDefinition: #TestLintResultWindow category: 'TestLint-GUI'!
+!classDefinition: #TestLintResultWindow category: #'TestLint-GUI'!
 SystemWindow subclass: #TestLintResultWindow
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
-!classDefinition: 'TestLintResultWindow class' category: 'TestLint-GUI'!
+!classDefinition: 'TestLintResultWindow class' category: #'TestLint-GUI'!
 TestLintResultWindow class
 	instanceVariableNames: ''!
 
-!classDefinition: #AbnormalUTFUseRuleTest category: 'TestLint-Tests'!
+!classDefinition: #AbnormalUTFUseRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #AbnormalUTFUseRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'AbnormalUTFUseRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'AbnormalUTFUseRuleTest class' category: #'TestLint-Tests'!
 AbnormalUTFUseRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #AnonymousTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #AnonymousTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #AnonymousTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'AnonymousTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'AnonymousTestRuleTest class' category: #'TestLint-Tests'!
 AnonymousTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #AssertionlessTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #AssertionlessTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #AssertionlessTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'AssertionlessTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'AssertionlessTestRuleTest class' category: #'TestLint-Tests'!
 AssertionlessTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #EmptyMethodCategoryRuleTest category: 'TestLint-Tests'!
+!classDefinition: #EmptyMethodCategoryRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #EmptyMethodCategoryRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'EmptyMethodCategoryRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'EmptyMethodCategoryRuleTest class' category: #'TestLint-Tests'!
 EmptyMethodCategoryRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExpectedTestSmellInformationTest category: 'TestLint-Tests'!
+!classDefinition: #ExpectedTestSmellInformationTest category: #'TestLint-Tests'!
 TestCase subclass: #ExpectedTestSmellInformationTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'ExpectedTestSmellInformationTest class' category: 'TestLint-Tests'!
+!classDefinition: 'ExpectedTestSmellInformationTest class' category: #'TestLint-Tests'!
 ExpectedTestSmellInformationTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #GuardedTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #GuardedTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #GuardedTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'GuardedTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'GuardedTestRuleTest class' category: #'TestLint-Tests'!
 GuardedTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #LongTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #LongTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #LongTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'LongTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'LongTestRuleTest class' category: #'TestLint-Tests'!
 LongTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #MagicLiteralsTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #MagicLiteralsTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #MagicLiteralsTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'MagicLiteralsTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'MagicLiteralsTestRuleTest class' category: #'TestLint-Tests'!
 MagicLiteralsTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #MaxInstanceVariablesRuleTest category: 'TestLint-Tests'!
+!classDefinition: #MaxInstanceVariablesRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #MaxInstanceVariablesRuleTest
 	instanceVariableNames: 'testClassNodeWithOneInstanceVariable'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'MaxInstanceVariablesRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'MaxInstanceVariablesRuleTest class' category: #'TestLint-Tests'!
 MaxInstanceVariablesRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #MixedSelectorsRuleTest category: 'TestLint-Tests'!
+!classDefinition: #MixedSelectorsRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #MixedSelectorsRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'MixedSelectorsRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'MixedSelectorsRuleTest class' category: #'TestLint-Tests'!
 MixedSelectorsRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #ProperOrganizationTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #ProperOrganizationTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #ProperOrganizationTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'ProperOrganizationTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'ProperOrganizationTestRuleTest class' category: #'TestLint-Tests'!
 ProperOrganizationTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #ReturningAssertionRuleTest category: 'TestLint-Tests'!
+!classDefinition: #ReturningAssertionRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #ReturningAssertionRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'ReturningAssertionRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'ReturningAssertionRuleTest class' category: #'TestLint-Tests'!
 ReturningAssertionRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TeardownOnlyRuleTest category: 'TestLint-Tests'!
+!classDefinition: #TeardownOnlyRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #TeardownOnlyRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TeardownOnlyRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TeardownOnlyRuleTest class' category: #'TestLint-Tests'!
 TeardownOnlyRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestClassNodeTest category: 'TestLint-Tests'!
+!classDefinition: #TestClassNodeTest category: #'TestLint-Tests'!
 TestCase subclass: #TestClassNodeTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestClassNodeTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestClassNodeTest class' category: #'TestLint-Tests'!
 TestClassNodeTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintRulesGetterTest category: 'TestLint-Tests'!
+!classDefinition: #TestLintRulesGetterTest category: #'TestLint-Tests'!
 TestCase subclass: #TestLintRulesGetterTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestLintRulesGetterTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestLintRulesGetterTest class' category: #'TestLint-Tests'!
 TestLintRulesGetterTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintTest category: 'TestLint-Tests'!
+!classDefinition: #TestLintTest category: #'TestLint-Tests'!
 TestCase subclass: #TestLintTest
 	instanceVariableNames: 'anonymousTestRule strictLongTestRule flexibleMaxInstanceVariablesRule'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestLintTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestLintTest class' category: #'TestLint-Tests'!
 TestLintTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestMethodCategoryNameRuleTest category: 'TestLint-Tests'!
+!classDefinition: #TestMethodCategoryNameRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #TestMethodCategoryNameRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestMethodCategoryNameRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestMethodCategoryNameRuleTest class' category: #'TestLint-Tests'!
 TestMethodCategoryNameRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestMethodNodeTest category: 'TestLint-Tests'!
+!classDefinition: #TestMethodNodeTest category: #'TestLint-Tests'!
 TestCase subclass: #TestMethodNodeTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestMethodNodeTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestMethodNodeTest class' category: #'TestLint-Tests'!
 TestMethodNodeTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestWithReturnRuleTest category: 'TestLint-Tests'!
+!classDefinition: #TestWithReturnRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #TestWithReturnRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TestWithReturnRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TestWithReturnRuleTest class' category: #'TestLint-Tests'!
 TestWithReturnRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TranscriptingTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #TranscriptingTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #TranscriptingTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'TranscriptingTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'TranscriptingTestRuleTest class' category: #'TestLint-Tests'!
 TranscriptingTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnclassifiedMethodCategoryRuleTest category: 'TestLint-Tests'!
+!classDefinition: #UnclassifiedMethodCategoryRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #UnclassifiedMethodCategoryRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'UnclassifiedMethodCategoryRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'UnclassifiedMethodCategoryRuleTest class' category: #'TestLint-Tests'!
 UnclassifiedMethodCategoryRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnusedSharedFixtureVariablesRuleTest category: 'TestLint-Tests'!
+!classDefinition: #UnusedSharedFixtureVariablesRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #UnusedSharedFixtureVariablesRuleTest
 	instanceVariableNames: 'notUsedInTest unused'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'UnusedSharedFixtureVariablesRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'UnusedSharedFixtureVariablesRuleTest class' category: #'TestLint-Tests'!
 UnusedSharedFixtureVariablesRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnusualTestOrderRuleTest category: 'TestLint-Tests'!
+!classDefinition: #UnusualTestOrderRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #UnusualTestOrderRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'UnusualTestOrderRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'UnusualTestOrderRuleTest class' category: #'TestLint-Tests'!
 UnusualTestOrderRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #WrongAssertUsageTestRuleTest category: 'TestLint-Tests'!
+!classDefinition: #WrongAssertUsageTestRuleTest category: #'TestLint-Tests'!
 TestCase subclass: #WrongAssertUsageTestRuleTest
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Tests'!
-!classDefinition: 'WrongAssertUsageTestRuleTest class' category: 'TestLint-Tests'!
+!classDefinition: 'WrongAssertUsageTestRuleTest class' category: #'TestLint-Tests'!
 WrongAssertUsageTestRuleTest class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintBrowserMenus category: 'TestLint-GUI'!
+!classDefinition: #TestLintBrowserMenus category: #'TestLint-GUI'!
 Object subclass: #TestLintBrowserMenus
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
-!classDefinition: 'TestLintBrowserMenus class' category: 'TestLint-GUI'!
+!classDefinition: 'TestLintBrowserMenus class' category: #'TestLint-GUI'!
 TestLintBrowserMenus class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintResultModel category: 'TestLint-GUI'!
+!classDefinition: #TestLintResultModel category: #'TestLint-GUI'!
 Object subclass: #TestLintResultModel
 	instanceVariableNames: 'nodesNamesList nodesNamesListIndex nodesTestLintFailuresDiccionary nodesTestLintFailuresDiccionaryIndex nodeTestSmellsIndex nodeMissingTestSmellsIndex linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
-!classDefinition: 'TestLintResultModel class' category: 'TestLint-GUI'!
+!classDefinition: 'TestLintResultModel class' category: #'TestLint-GUI'!
 TestLintResultModel class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintRunner category: 'TestLint-GUI'!
+!classDefinition: #TestLintRunner category: #'TestLint-GUI'!
 Object subclass: #TestLintRunner
 	instanceVariableNames: 'node'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
-!classDefinition: 'TestLintRunner class' category: 'TestLint-GUI'!
+!classDefinition: 'TestLintRunner class' category: #'TestLint-GUI'!
 TestLintRunner class
 	instanceVariableNames: ''!
 
-!classDefinition: #AssertionChecker category: 'TestLint-Model'!
+!classDefinition: #AssertionChecker category: #'TestLint-Model'!
 Object subclass: #AssertionChecker
 	instanceVariableNames: 'messageNode class missingMethodNodesToVisit allCheckedAndExceptedSelectorsInClassHierarchy'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'AssertionChecker class' category: 'TestLint-Model'!
+!classDefinition: 'AssertionChecker class' category: #'TestLint-Model'!
 AssertionChecker class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExpectedTestSmell category: 'TestLint-Model'!
+!classDefinition: #ExpectedTestSmell category: #'TestLint-Model'!
 Object subclass: #ExpectedTestSmell
 	instanceVariableNames: 'node ruleClass description'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'ExpectedTestSmell class' category: 'TestLint-Model'!
+!classDefinition: 'ExpectedTestSmell class' category: #'TestLint-Model'!
 ExpectedTestSmell class
 	instanceVariableNames: ''!
 
-!classDefinition: #ExpectedTestSmellInformation category: 'TestLint-Model'!
+!classDefinition: #ExpectedTestSmellInformation category: #'TestLint-Model'!
 Object subclass: #ExpectedTestSmellInformation
 	instanceVariableNames: 'ruleClass description symbol'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'ExpectedTestSmellInformation class' category: 'TestLint-Model'!
+!classDefinition: 'ExpectedTestSmellInformation class' category: #'TestLint-Model'!
 ExpectedTestSmellInformation class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLint category: 'TestLint-Model'!
+!classDefinition: #TestLint category: #'TestLint-Model'!
 Object subclass: #TestLint
 	instanceVariableNames: 'rules ruleCollection expectedFailures node notExpectedTestSmells notSatisfiedExpectations'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestLint class' category: 'TestLint-Model'!
+!classDefinition: 'TestLint class' category: #'TestLint-Model'!
 TestLint class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintFailure category: 'TestLint-Model'!
+!classDefinition: #TestLintFailure category: #'TestLint-Model'!
 Object subclass: #TestLintFailure
 	instanceVariableNames: 'node ruleClass description'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestLintFailure class' category: 'TestLint-Model'!
+!classDefinition: 'TestLintFailure class' category: #'TestLint-Model'!
 TestLintFailure class
 	instanceVariableNames: ''!
 
-!classDefinition: #MissingTestSmell category: 'TestLint-Model'!
+!classDefinition: #MissingTestSmell category: #'TestLint-Model'!
 TestLintFailure subclass: #MissingTestSmell
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MissingTestSmell class' category: 'TestLint-Model'!
+!classDefinition: 'MissingTestSmell class' category: #'TestLint-Model'!
 MissingTestSmell class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestSmell category: 'TestLint-Model'!
+!classDefinition: #TestSmell category: #'TestLint-Model'!
 TestLintFailure subclass: #TestSmell
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestSmell class' category: 'TestLint-Model'!
+!classDefinition: 'TestSmell class' category: #'TestLint-Model'!
 TestSmell class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintNode category: 'TestLint-Model'!
+!classDefinition: #TestLintNode category: #'TestLint-Model'!
 Object subclass: #TestLintNode
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestLintNode class' category: 'TestLint-Model'!
+!classDefinition: 'TestLintNode class' category: #'TestLint-Model'!
 TestLintNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #MethodCategoryNode category: 'TestLint-Model'!
+!classDefinition: #MethodCategoryNode category: #'TestLint-Model'!
 TestLintNode subclass: #MethodCategoryNode
 	instanceVariableNames: 'categoryName classOrganizer linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MethodCategoryNode class' category: 'TestLint-Model'!
+!classDefinition: 'MethodCategoryNode class' category: #'TestLint-Model'!
 MethodCategoryNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #NullNode category: 'TestLint-Model'!
+!classDefinition: #NullNode category: #'TestLint-Model'!
 TestLintNode subclass: #NullNode
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'NullNode class' category: 'TestLint-Model'!
+!classDefinition: 'NullNode class' category: #'TestLint-Model'!
 NullNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestClassNode category: 'TestLint-Model'!
+!classDefinition: #TestClassNode category: #'TestLint-Model'!
 TestLintNode subclass: #TestClassNode
 	instanceVariableNames: 'linkedClass'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestClassNode class' category: 'TestLint-Model'!
+!classDefinition: 'TestClassNode class' category: #'TestLint-Model'!
 TestClassNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestMethodNode category: 'TestLint-Model'!
+!classDefinition: #TestMethodNode category: #'TestLint-Model'!
 TestLintNode subclass: #TestMethodNode
 	instanceVariableNames: 'compiledMethod'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestMethodNode class' category: 'TestLint-Model'!
+!classDefinition: 'TestMethodNode class' category: #'TestLint-Model'!
 TestMethodNode class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintRule category: 'TestLint-Model'!
+!classDefinition: #TestLintRule category: #'TestLint-Model'!
 Object subclass: #TestLintRule
 	instanceVariableNames: 'violationExtraInformation'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestLintRule class' category: 'TestLint-Model'!
+!classDefinition: 'TestLintRule class' category: #'TestLint-Model'!
 TestLintRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #ClassRule category: 'TestLint-Model'!
+!classDefinition: #ClassRule category: #'TestLint-Model'!
 TestLintRule subclass: #ClassRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'ClassRule class' category: 'TestLint-Model'!
+!classDefinition: 'ClassRule class' category: #'TestLint-Model'!
 ClassRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #AbnormalUTFUseRule category: 'TestLint-Model'!
+!classDefinition: #AbnormalUTFUseRule category: #'TestLint-Model'!
 ClassRule subclass: #AbnormalUTFUseRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'AbnormalUTFUseRule class' category: 'TestLint-Model'!
+!classDefinition: 'AbnormalUTFUseRule class' category: #'TestLint-Model'!
 AbnormalUTFUseRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #MaxInstanceVariablesRule category: 'TestLint-Model'!
+!classDefinition: #MaxInstanceVariablesRule category: #'TestLint-Model'!
 ClassRule subclass: #MaxInstanceVariablesRule
 	instanceVariableNames: 'threshold'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MaxInstanceVariablesRule class' category: 'TestLint-Model'!
+!classDefinition: 'MaxInstanceVariablesRule class' category: #'TestLint-Model'!
 MaxInstanceVariablesRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TeardownOnlyRule category: 'TestLint-Model'!
+!classDefinition: #TeardownOnlyRule category: #'TestLint-Model'!
 ClassRule subclass: #TeardownOnlyRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TeardownOnlyRule class' category: 'TestLint-Model'!
+!classDefinition: 'TeardownOnlyRule class' category: #'TestLint-Model'!
 TeardownOnlyRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnusedSharedFixtureVariablesRule category: 'TestLint-Model'!
+!classDefinition: #UnusedSharedFixtureVariablesRule category: #'TestLint-Model'!
 ClassRule subclass: #UnusedSharedFixtureVariablesRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'UnusedSharedFixtureVariablesRule class' category: 'TestLint-Model'!
+!classDefinition: 'UnusedSharedFixtureVariablesRule class' category: #'TestLint-Model'!
 UnusedSharedFixtureVariablesRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #MethodCategoryRule category: 'TestLint-Model'!
+!classDefinition: #MethodCategoryRule category: #'TestLint-Model'!
 TestLintRule subclass: #MethodCategoryRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MethodCategoryRule class' category: 'TestLint-Model'!
+!classDefinition: 'MethodCategoryRule class' category: #'TestLint-Model'!
 MethodCategoryRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #EmptyMethodCategoryRule category: 'TestLint-Model'!
+!classDefinition: #EmptyMethodCategoryRule category: #'TestLint-Model'!
 MethodCategoryRule subclass: #EmptyMethodCategoryRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'EmptyMethodCategoryRule class' category: 'TestLint-Model'!
+!classDefinition: 'EmptyMethodCategoryRule class' category: #'TestLint-Model'!
 EmptyMethodCategoryRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #MixedSelectorsRule category: 'TestLint-Model'!
+!classDefinition: #MixedSelectorsRule category: #'TestLint-Model'!
 MethodCategoryRule subclass: #MixedSelectorsRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MixedSelectorsRule class' category: 'TestLint-Model'!
+!classDefinition: 'MixedSelectorsRule class' category: #'TestLint-Model'!
 MixedSelectorsRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestMethodCategoryNameRule category: 'TestLint-Model'!
+!classDefinition: #TestMethodCategoryNameRule category: #'TestLint-Model'!
 MethodCategoryRule subclass: #TestMethodCategoryNameRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestMethodCategoryNameRule class' category: 'TestLint-Model'!
+!classDefinition: 'TestMethodCategoryNameRule class' category: #'TestLint-Model'!
 TestMethodCategoryNameRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #MethodRule category: 'TestLint-Model'!
+!classDefinition: #MethodRule category: #'TestLint-Model'!
 TestLintRule subclass: #MethodRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MethodRule class' category: 'TestLint-Model'!
+!classDefinition: 'MethodRule class' category: #'TestLint-Model'!
 MethodRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #AnonymousTestRule category: 'TestLint-Model'!
+!classDefinition: #AnonymousTestRule category: #'TestLint-Model'!
 MethodRule subclass: #AnonymousTestRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'AnonymousTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'AnonymousTestRule class' category: #'TestLint-Model'!
 AnonymousTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #AssertionlessTestRule category: 'TestLint-Model'!
+!classDefinition: #AssertionlessTestRule category: #'TestLint-Model'!
 MethodRule subclass: #AssertionlessTestRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'AssertionlessTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'AssertionlessTestRule class' category: #'TestLint-Model'!
 AssertionlessTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #GuardedTestRule category: 'TestLint-Model'!
+!classDefinition: #GuardedTestRule category: #'TestLint-Model'!
 MethodRule subclass: #GuardedTestRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'GuardedTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'GuardedTestRule class' category: #'TestLint-Model'!
 GuardedTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #LongTestRule category: 'TestLint-Model'!
+!classDefinition: #LongTestRule category: #'TestLint-Model'!
 MethodRule subclass: #LongTestRule
 	instanceVariableNames: 'threshold'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'LongTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'LongTestRule class' category: #'TestLint-Model'!
 LongTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #MagicLiteralsTestRule category: 'TestLint-Model'!
+!classDefinition: #MagicLiteralsTestRule category: #'TestLint-Model'!
 MethodRule subclass: #MagicLiteralsTestRule
 	instanceVariableNames: 'threshold'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'MagicLiteralsTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'MagicLiteralsTestRule class' category: #'TestLint-Model'!
 MagicLiteralsTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #ProperOrganizationTestRule category: 'TestLint-Model'!
+!classDefinition: #ProperOrganizationTestRule category: #'TestLint-Model'!
 MethodRule subclass: #ProperOrganizationTestRule
 	instanceVariableNames: 'innerAssertionNodesMissing'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'ProperOrganizationTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'ProperOrganizationTestRule class' category: #'TestLint-Model'!
 ProperOrganizationTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #ReturningAssertionRule category: 'TestLint-Model'!
+!classDefinition: #ReturningAssertionRule category: #'TestLint-Model'!
 MethodRule subclass: #ReturningAssertionRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'ReturningAssertionRule class' category: 'TestLint-Model'!
+!classDefinition: 'ReturningAssertionRule class' category: #'TestLint-Model'!
 ReturningAssertionRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestWithReturnRule category: 'TestLint-Model'!
+!classDefinition: #TestWithReturnRule category: #'TestLint-Model'!
 MethodRule subclass: #TestWithReturnRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestWithReturnRule class' category: 'TestLint-Model'!
+!classDefinition: 'TestWithReturnRule class' category: #'TestLint-Model'!
 TestWithReturnRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TranscriptingTestRule category: 'TestLint-Model'!
+!classDefinition: #TranscriptingTestRule category: #'TestLint-Model'!
 MethodRule subclass: #TranscriptingTestRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TranscriptingTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'TranscriptingTestRule class' category: #'TestLint-Model'!
 TranscriptingTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnclassifiedMethodCategoryRule category: 'TestLint-Model'!
+!classDefinition: #UnclassifiedMethodCategoryRule category: #'TestLint-Model'!
 MethodRule subclass: #UnclassifiedMethodCategoryRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'UnclassifiedMethodCategoryRule class' category: 'TestLint-Model'!
+!classDefinition: 'UnclassifiedMethodCategoryRule class' category: #'TestLint-Model'!
 UnclassifiedMethodCategoryRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #UnusualTestOrderRule category: 'TestLint-Model'!
+!classDefinition: #UnusualTestOrderRule category: #'TestLint-Model'!
 MethodRule subclass: #UnusualTestOrderRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'UnusualTestOrderRule class' category: 'TestLint-Model'!
+!classDefinition: 'UnusualTestOrderRule class' category: #'TestLint-Model'!
 UnusualTestOrderRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #WrongAssertUsageTestRule category: 'TestLint-Model'!
+!classDefinition: #WrongAssertUsageTestRule category: #'TestLint-Model'!
 MethodRule subclass: #WrongAssertUsageTestRule
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'WrongAssertUsageTestRule class' category: 'TestLint-Model'!
+!classDefinition: 'WrongAssertUsageTestRule class' category: #'TestLint-Model'!
 WrongAssertUsageTestRule class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintRulesGetter category: 'TestLint-Model'!
+!classDefinition: #TestLintRulesGetter category: #'TestLint-Model'!
 Object subclass: #TestLintRulesGetter
 	instanceVariableNames: 'testRuleCollection class'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-Model'!
-!classDefinition: 'TestLintRulesGetter class' category: 'TestLint-Model'!
+!classDefinition: 'TestLintRulesGetter class' category: #'TestLint-Model'!
 TestLintRulesGetter class
 	instanceVariableNames: ''!
 
@@ -3676,10 +3676,10 @@ isViolatedBy: aTestMethodNode
 	classUnclassifiedSelectors _ self getClassUnclassifiedSelectors: aTestMethodNode linkedClass.
 	^classUnclassifiedSelectors includes: aTestMethodNode name ! !
 
-!UnclassifiedMethodCategoryRule methodsFor: 'accessing' stamp: 'FL 9/21/2022 23:22:10'!
+!UnclassifiedMethodCategoryRule methodsFor: 'accessing' stamp: 'HAW 5/7/2024 17:29:37'!
 getClassUnclassifiedSelectors: aClass
 	
-	^aClass organization listAtCategoryNamed: ClassOrganizer default! !
+	^aClass organization listAtCategoryNamed: ClassOrganizer defaultMethodCategory! !
 
 !UnclassifiedMethodCategoryRule class methodsFor: 'message' stamp: 'FL 9/21/2022 22:54:33'!
 description
