@@ -1,6 +1,6 @@
-'From Cuis7.1 [latest update: #6578] on 10 August 2024 at 4:46:42 pm'!
-'Description Updated with Cuis7.1'!
-!provides: 'TestLint' 1 43!
+'From Cuis7.1 [latest update: #6580] on 11 August 2024 at 9:04:34 pm'!
+'Description Updated to Cuis7.1 - Menu changes'!
+!provides: 'TestLint' 1 44!
 !requires: 'Regex-Core' 1 6 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
 SystemOrganization addCategory: #'TestLint-Model'!
@@ -772,7 +772,7 @@ classListMenuSpec
 		#(62		'run testlint' 				nil 		model 			runTestLintOverClass 							displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 14:28:20'!
+!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 8/11/2024 20:51:08'!
 messageListMenuSpec
 	"
 	BrowserWindow at: #messageListMenuSpec registerMenuAndShortcutsSpecProvider:
@@ -780,7 +780,7 @@ messageListMenuSpec
 	Do this in TestLintBrowserMenus class >> initialize
 	"
 	^#(
-		#(112		'run testlint' 				nil 		model 			runTestLintOverMethod 							displayIcon)
+		#(122		'run testlint' 				nil 		model 			runTestLintOverMethod 							displayIcon)
 	)! !
 
 !TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 14:30:37'!
