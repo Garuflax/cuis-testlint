@@ -1,6 +1,6 @@
-'From Cuis7.1 [latest update: #6580] on 11 August 2024 at 9:04:34 pm'!
-'Description Updated to Cuis7.1 - Menu changes'!
-!provides: 'TestLint' 1 44!
+'From Cuis7.3 [latest update: #6959] on 30 December 2024 at 8:15:54 pm'!
+'Description Udated to Cuis 7.3'!
+!provides: 'TestLint' 1 45!
 !requires: 'Regex-Core' 1 6 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
 SystemOrganization addCategory: #'TestLint-Model'!
@@ -794,13 +794,13 @@ methodCategoriesListMenuSpec
 		#(150		'run testlint' 				nil 		model 		runTestLintOverMessageCategory 									displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'initialization' stamp: 'jmv 7/30/2024 14:53:55'!
+!TestLintBrowserMenus class methodsFor: 'initialization' stamp: 'HAW 12/30/2024 18:26:58'!
 initialize
 
 	BrowserWindow at: #classListMenuSpec registerMenuAndShortcutsSpecProvider:
 		(MessageSend receiver: self selector: #classListMenuSpec).
 
-	BrowserWindow at: #methodCategoriesListMenuSpec registerMenuAndShortcutsSpecProvider:
+	BrowserWindow at: #messageCatListMenuSpec registerMenuAndShortcutsSpecProvider:
 		(MessageSend receiver: self selector: #methodCategoriesListMenuSpec).
 
 	BrowserWindow at: #messageListMenuSpec registerMenuAndShortcutsSpecProvider:
