@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #6959] on 30 December 2024 at 8:15:54 pm'!
-'Description Udated to Cuis 7.3'!
-!provides: 'TestLint' 1 45!
+'From Cuis7.3 [latest update: #6960] on 31 December 2024 at 7:06:41 pm'!
+'Description Udated to Cuis 7.3 - Menu changes'!
+!provides: 'TestLint' 1 46!
 !requires: 'Regex-Core' 1 6 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
 SystemOrganization addCategory: #'TestLint-Model'!
@@ -761,37 +761,25 @@ displayTestLintResultFrom: results
 
 	self open: results label: 'TestLint Result'.! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 14:46:18'!
+!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:32:48'!
 classListMenuSpec
-	"
-	BrowserWindow at: #classListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: TestLintBrowserMenus selector: #classListMenuSpec).
-	Do this in TestLintBrowserMenus class >> initialize
-	"
+
 	^#(
-		#(62		'run testlint' 				nil 		model 			runTestLintOverClass 							displayIcon)
+		#(125		'Run TestLint' 				nil 		model 			runTestLintOverClass 							displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 8/11/2024 20:51:08'!
+!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:36:12'!
 messageListMenuSpec
-	"
-	BrowserWindow at: #messageListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: TestLintBrowserMenus selector: #messageListMenuSpec).
-	Do this in TestLintBrowserMenus class >> initialize
-	"
+	
 	^#(
-		#(122		'run testlint' 				nil 		model 			runTestLintOverMethod 							displayIcon)
+		#(77		'Run TestLint' 				nil 		model 			runTestLintOverMethod 							displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'jmv 7/30/2024 14:30:37'!
+!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:34:29'!
 methodCategoriesListMenuSpec
-	"
-	BrowserWindow at: #messageListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: TestLintBrowserMenus selector: #messageListMenuSpec).
-	Do this in TestLintBrowserMenus class >> initialize
-	"
+	
 	^#(
-		#(150		'run testlint' 				nil 		model 		runTestLintOverMessageCategory 									displayIcon)
+		#(147		'Run TestLint' 				nil 		model 		runTestLintOverMessageCategory 									displayIcon)
 	)! !
 
 !TestLintBrowserMenus class methodsFor: 'initialization' stamp: 'HAW 12/30/2024 18:26:58'!
