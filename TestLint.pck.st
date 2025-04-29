@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #6960] on 31 December 2024 at 7:06:41 pm'!
-'Description Udated to Cuis 7.3 - Menu changes'!
-!provides: 'TestLint' 1 46!
+'From Cuis7.3 [latest update: #7102] on 29 April 2025 at 8:31:49 am'!
+'Description Unload menues'!
+!provides: 'TestLint' 1 47!
 !requires: 'Regex-Core' 1 6 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
 SystemOrganization addCategory: #'TestLint-Model'!
@@ -17,14 +17,14 @@ SystemWindow subclass: #TestLintResultWindow
 TestLintResultWindow class
 	instanceVariableNames: ''!
 
-!classDefinition: #TestLintBrowserMenus category: #'TestLint-GUI'!
-Object subclass: #TestLintBrowserMenus
+!classDefinition: #TestLintBrowserMenues category: #'TestLint-GUI'!
+Object subclass: #TestLintBrowserMenues
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TestLint-GUI'!
-!classDefinition: 'TestLintBrowserMenus class' category: #'TestLint-GUI'!
-TestLintBrowserMenus class
+!classDefinition: 'TestLintBrowserMenues class' category: #'TestLint-GUI'!
+TestLintBrowserMenues class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestLintResultModel category: #'TestLint-GUI'!
@@ -651,7 +651,7 @@ WrongAssertUsageTestRuleTest class
 !TestLintResultWindow commentStamp: '<historical>' prior: 0!
 I am a specialized window that shows the results of the TestLint run.!
 
-!TestLintBrowserMenus commentStamp: '<historical>' prior: 0!
+!TestLintBrowserMenues commentStamp: '<historical>' prior: 0!
 I exist with the sole purpose of defining the menu items to run testlint.!
 
 !TestLintResultModel commentStamp: '<historical>' prior: 0!
@@ -761,38 +761,58 @@ displayTestLintResultFrom: results
 
 	self open: results label: 'TestLint Result'.! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:32:48'!
+!TestLintBrowserMenues class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:32:48'!
 classListMenuSpec
 
 	^#(
 		#(125		'Run TestLint' 				nil 		model 			runTestLintOverClass 							displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:36:12'!
+!TestLintBrowserMenues class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:36:12'!
 messageListMenuSpec
 	
 	^#(
 		#(77		'Run TestLint' 				nil 		model 			runTestLintOverMethod 							displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:34:29'!
+!TestLintBrowserMenues class methodsFor: 'menu & kbd shortcuts' stamp: 'HAW 12/31/2024 18:34:29'!
 methodCategoriesListMenuSpec
 	
 	^#(
 		#(147		'Run TestLint' 				nil 		model 		runTestLintOverMessageCategory 									displayIcon)
 	)! !
 
-!TestLintBrowserMenus class methodsFor: 'initialization' stamp: 'HAW 12/30/2024 18:26:58'!
+!TestLintBrowserMenues class methodsFor: 'initialization' stamp: 'HAW 4/29/2025 07:40:59'!
 initialize
 
-	BrowserWindow at: #classListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: self selector: #classListMenuSpec).
+	 BrowserWindow registerAll: self menuAndShortcutsSpecs! !
 
-	BrowserWindow at: #messageCatListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: self selector: #methodCategoriesListMenuSpec).
+!TestLintBrowserMenues class methodsFor: 'initialization' stamp: 'HAW 4/29/2025 07:41:09'!
+unload
 
-	BrowserWindow at: #messageListMenuSpec registerMenuAndShortcutsSpecProvider:
-		(MessageSend receiver: self selector: #messageListMenuSpec).! !
+	 BrowserWindow unregisterAll: self menuAndShortcutsSpecs! !
+
+!TestLintBrowserMenues class methodsFor: 'menues' stamp: 'HAW 4/29/2025 07:36:17'!
+classListMenuSpecSend
+
+	^ MessageSend receiver: self selector: #classListMenuSpec! !
+
+!TestLintBrowserMenues class methodsFor: 'menues' stamp: 'HAW 4/29/2025 07:40:51'!
+menuAndShortcutsSpecs
+
+	^{	{ #classListMenuSpec. self classListMenuSpecSend }.
+		{ #messageCatListMenuSpec. self methodCategoriesListMenuSpecSend }.
+		{ #messageListMenuSpec. self messageListMenuSpecSend }}! !
+
+!TestLintBrowserMenues class methodsFor: 'menues' stamp: 'HAW 4/29/2025 07:38:05'!
+messageListMenuSpecSend
+
+	^ MessageSend receiver: self selector: #messageListMenuSpec! !
+
+!TestLintBrowserMenues class methodsFor: 'menues' stamp: 'HAW 4/29/2025 07:36:26'!
+methodCategoriesListMenuSpecSend
+
+	^ MessageSend receiver: self selector: #methodCategoriesListMenuSpec! !
 
 !TestLintResultModel methodsFor: 'initialization' stamp: 'FL 8/24/2022 20:18:49'!
 addTestLintFailure: aTestLintFailure toNode: aNodeName
@@ -3794,4 +3814,4 @@ runTestLintOverMethod
 exceptedTestLintSelectorsForAssertionAnalysis
 
 	^Array with: #createClassNamed:subclassOf:instanceVariableNames:classVariableNames:poolDictionaries:category:.! !
-TestLintBrowserMenus initialize!
+TestLintBrowserMenues initialize!
