@@ -1,7 +1,8 @@
-'From Cuis7.3 [latest update: #7102] on 29 April 2025 at 8:31:49 am'!
-'Description Unload menues'!
-!provides: 'TestLint' 1 47!
+'From Cuis7.3 [latest update: #7146] on 12 May 2025 at 12:03:22 pm'!
+'Description BaseImageTests as requirement'!
+!provides: 'TestLint' 1 48!
 !requires: 'Regex-Core' 1 6 nil!
+!requires: 'BaseImageTests' 1 450 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
 SystemOrganization addCategory: #'TestLint-Model'!
 SystemOrganization addCategory: #'TestLint-Tests'!
