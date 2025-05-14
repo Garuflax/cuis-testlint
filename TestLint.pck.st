@@ -1,6 +1,6 @@
-'From Cuis7.3 [latest update: #7146] on 12 May 2025 at 12:03:22 pm'!
-'Description BaseImageTests as requirement'!
-!provides: 'TestLint' 1 48!
+'From Cuis7.3 [latest update: #7146] on 14 May 2025 at 11:59:13 am'!
+'Description fix sent unimplemented messages'!
+!provides: 'TestLint' 1 49!
 !requires: 'Regex-Core' 1 6 nil!
 !requires: 'BaseImageTests' 1 450 nil!
 SystemOrganization addCategory: #'TestLint-GUI'!
@@ -888,10 +888,10 @@ browseExpectedTestSmells
 
 	BrowserWindow fullOnClass: linkedClass selector: #expectedTestSmells! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 21:59:33'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'HAW 5/14/2025 11:39:35'!
 browseMethodCategoryNode: aMethodCategoryNode
 
-	BrowserWindow fullOnClass: aMethodCategoryNode linkedClass.
+	BrowserWindow fullOnClass: aMethodCategoryNode linkedClass selector: nil.
 	"TODO set category to window. BrowserWindow messages do not return the created instance so I cannot modify the state of a created windows easily."! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:38:33'!
@@ -899,9 +899,10 @@ browseNode
 
 	^self selectedNode browse: self.! !
 
-!TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 20:12:26'!
+!TestLintResultModel methodsFor: 'user interface support' stamp: 'HAW 5/14/2025 11:39:56'!
 browseTestClassNode: aTestClassNode
-	BrowserWindow fullOnClass: aTestClassNode linkedClass ! !
+
+	BrowserWindow fullOnClass: aTestClassNode linkedClass selector: nil! !
 
 !TestLintResultModel methodsFor: 'user interface support' stamp: 'FL 9/14/2022 19:59:48'!
 browseTestMethodNode: aTestMethodNode
@@ -3785,11 +3786,10 @@ expectedTestSmells
 
 	^Array with: (ExpectedTestSmellInformation in: #testWithWrongAssertUsage for: WrongAssertUsageTestRule because: 'Testing purpose')! !
 
-!Browser methodsFor: '*TestLint' stamp: 'FL 5/29/2022 14:51:54'!
+!Browser methodsFor: '*TestLint' stamp: 'HAW 5/14/2025 11:56:44'!
 runTestLintOverClass
 
-	self selectedClassName ifNotNil: [ :aClassName | | selectedClass |
-		selectedClass _ Smalltalk classNamed: aClassName.
+	self selectedClass ifNotNil: [ :selectedClass | 
 		(selectedClass is: #TestCaseClass) ifTrue: [
 			TestLintRunner run: (TestClassNode for: selectedClass) ]]! !
 
